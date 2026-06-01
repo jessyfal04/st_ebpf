@@ -1,4 +1,5 @@
-git clone --depth 1 --filter=blob:none --sparse https://github.com/torvalds/linux.git
+git clone --depth 1 --filter=blob:none -
+-sparse https://github.com/torvalds/linux.git
 cd linux
 git sparse-checkout set \
   kernel/bpf \

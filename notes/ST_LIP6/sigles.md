@@ -1,0 +1,3 @@
+- bpfel = BPF little-endian
+- xdp = eXpress Data Path
+- elf : Executable and Linkable File

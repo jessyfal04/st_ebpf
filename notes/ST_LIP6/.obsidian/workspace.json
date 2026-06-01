@@ -4,17 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "7c80750fcbccc57f",
+        "id": "7b7fe24c80e1bb24",
         "type": "tabs",
         "children": [
           {
-            "id": "f86742afd6859196",
+            "id": "a1007bb0eb93aeae",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "day/2026_06_01.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "2026_06_01"
+            }
+          },
+          {
+            "id": "0387c98141af8279",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "autre/c_to_ebpf.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "c_to_ebpf"
             }
           }
         ]
@@ -49,7 +67,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:#define",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -174,32 +192,47 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "pdf-plus:PDF++: Toggle auto-copy": false,
+      "pdf-plus:PDF++: Toggle auto-focus": false,
+      "pdf-plus:PDF++: Toggle auto-paste": false
     }
   },
-  "active": "b0bb2db5f66f0ee2",
+  "active": "a1007bb0eb93aeae",
   "lastOpenFiles": [
-    "obsidian/lib/paper_incremental.pdf",
-    "obsidian/lib/paper_ebpf.pdf",
-    "obsidian/lib/book.pdf",
-    "obsidian/lib",
-    "obsidian/pdf/sujet_stage.pdf",
-    "obsidian/pdf/cours_mpri.pdf",
-    "obsidian/pdf/TAS_resume.pdf",
-    "obsidian/pdf/TAS_cours-9_ok.pdf",
-    "obsidian/pdf/TAS_cours-8_ok.pdf",
-    "obsidian/pdf/TAS_cours-14_ok.pdf",
-    "obsidian/pdf/TAS_cours-13_ok.pdf",
+    "autre/c_to_ebpf.md",
+    "day/2026_06_01.md",
+    "autre/Rapport_PSTL.md",
+    "autre/Jeux de Test.md",
+    "autre/Instruction Set Architecture.md",
+    "autre/Dé-Assembleur.md",
+    "autre/C_to_EBPF.md",
+    "todo.md",
+    "pdf/lib/Rapport_PSTL-eBPF.pdf",
+    "ressources.md",
+    "sigles.md",
+    "ia.md",
+    "pdf/lib/paper_ebpf.pdf",
+    "pdf/lib/paper_incremental.pdf",
+    "pdf/lib/book.pdf",
+    "autre/questions.md",
+    "autre",
+    "Rapport_PSTL.md",
+    "pdf/lib/thesis_monat.pdf",
+    "pdf/lib",
+    "lib/thesis_monat.pdf",
+    "lib/Rapport_PSTL-eBPF.pdf",
+    "lib",
+    "notes/C_to_EBPF.md",
+    "notes/Instruction Set Architecture.md",
+    "[[thesis_monat.pdf]].md",
+    "notes/Rapport_PSTL.md",
+    "autre/notes.md",
     "obsidian/autre/sigles.md",
     "obsidian/autre/questions.md",
     "obsidian/autre/notes.md",
     "obsidian/autre/Instruction Set Architecture.md",
     "obsidian/autre/C_to_EBPF.md",
-    "obsidian/Ressources.md",
-    "Ressources.md",
-    "autre/questions.md",
-    "autre/notes.md",
-    "autre/Instruction Set Architecture.md",
-    "autre/C_to_EBPF.md"
+    "obsidian/Ressources.md"
   ]
 }

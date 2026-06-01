@@ -1,9 +1,0 @@
-MOPSA :
-https://gitlab.com/mopsa/mopsa-analyzer
-https://mopsa.lip6.fr/
-
-EBPF :
-https://github.com/torvalds/linux/tree/master/kernel/bpf
-https://www.collabora.com/news-and-blog/blog/2019/04/05/an-ebpf-overview-part-1-introduction/
-https://vbpf.github.io/assets/prevail-paper.pdf
-https://docs.ebpf.io/linux/concepts/
