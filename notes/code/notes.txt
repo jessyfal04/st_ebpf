@@ -1,0 +1,18 @@
+git clone --depth 1 --filter=blob:none --sparse https://github.com/torvalds/linux.git
+cd linux
+git sparse-checkout set \
+  kernel/bpf \
+  include/linux \
+  include/uapi/linux \
+  tools/testing/selftests/bpf \
+  Documentation/bpf
+
+grep -R "struct bpf_reg_state" -n include/linux kernel/bpf
+grep -R "enum bpf_reg_type" -n include/linux kernel/bpf
+grep -R "do_check" -n kernel/bpf/verifier.c
+grep -R "check_mem_access" -n kernel/bpf/verifier.c
+grep -R "check_helper_call" -n kernel/bpf/verifier.c
+grep -R "states_equal" -n kernel/bpf/verifier.c
+grep -R "regsafe" -n kernel/bpf/verifier.c
+grep -R "tnum" -n kernel/bpf include/linux
+
