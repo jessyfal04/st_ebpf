@@ -20,8 +20,23 @@
               "icon": "lucide-file",
               "title": "todo"
             }
+          },
+          {
+            "id": "6d15f577f60bb488",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "todo.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "todo"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -187,10 +202,11 @@
       "pdf-plus:PDF++: Toggle auto-paste": false
     }
   },
-  "active": "45805bf14535bf7d",
+  "active": "6d15f577f60bb488",
   "lastOpenFiles": [
-    "ressources.md",
+    "notes.md",
     "todo.md",
+    "ressources.md",
     "autre/Instruction Set Architecture.md",
     "autre/Sections.md",
     "autre/Rapport_PSTL.md",

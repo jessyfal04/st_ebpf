@@ -1,8 +1,12 @@
 # Décodeur
-- Faire un programme avec .maps ; faire un programme avec des fonction internes ; structures
+- Ajouter le support de
+	- Maps (maps.c)
+	- Fonctions internes (func.c)
+	- Structures (manhatan.c)
+	- Tablaux
 ## Demain :
 - Comprendre les instruction - faire un arbre de décision pour chaque instr
-
+- 
 # Next
 - Lire thèse qui explique MOPSA
 - Mini Parser : 
