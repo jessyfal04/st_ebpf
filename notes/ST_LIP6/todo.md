@@ -1,10 +1,8 @@
-# Clean de-asm
-- Voir si on peut avoir un déassembleur clean ! et + simple ! 
-https://github.com/libbpf/bpftool
-Pour pouvoir avoir + de features
 
-Pour pouvoir avoir le bytecode clean et prêt à être parsé, on peut utiliser une combinaison de llvm-objdump et awk pour filtrer les lignes. Je regarde s'il y a pas d'autre outil + simple que ce tour de passe-passe.
-Ou sinon faudrait skip avec le parseur mais jsp si on peut ~~
+# Décodeur
+- Comment savoir si on extrait des bouts en 32bits ou des bouts en 64 bits ? Il faut traiter les 2?
+- Comprendre les décompositions et tt ! 
+
 # Mini Parseur
 - Tenter de parser qq les opcodes de ebpf depuis le code-octet
 

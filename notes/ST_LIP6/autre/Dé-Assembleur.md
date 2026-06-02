@@ -1,4 +1,4 @@
-
+## Commandes
 On peut utiliser `llvm-objdump -d X | tee X.dis` pour avoir le contenu d'un fichier .o
 
 > [!NOTE] Disasm
@@ -70,4 +70,21 @@ On peut utiliser `llvm-objdump -d X | tee X.dis` pour avoir le contenu d'un fich
 >   C (compressed), x (unknown), o (OS specific), E (exclude),
 >   D (mbind), p (processor specific)
 
+
+## Protocole d'extraction
+On doit procéder comme ça :
+- On regarde les sections
+- On identifie les lignes avec de prog avec TEXT ou AX
+- On les extrait si non vide, en binaire, en hex textuel, en mode côte-à-côte
+On pourra parser les fichiers dans le format que l'on veut
+
+```bash
+├── test
+│   ├── sections_llvm-objdump.txt
+│   ├── sections_readelf.txt
+│   ├── test_xdp.bin
+│   ├── test_xdp.hex
+│   └── test_xdp.txt
+└── test.o
+```
 
