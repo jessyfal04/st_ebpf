@@ -17,3 +17,5 @@ grep -R "states_equal" -n kernel/bpf/verifier.c
 grep -R "regsafe" -n kernel/bpf/verifier.c
 grep -R "tnum" -n kernel/bpf include/linux
 
+git clone --filter=blob:none --no-checkout https://github.com/libbpf/libbpf-bootstrap.git && cd libbpf-bootstrap
+&& git checkout fac4e8ddf011aead8e14962bf8db74542331264b -- examples/c

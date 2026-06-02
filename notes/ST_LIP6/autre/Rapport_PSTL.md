@@ -21,9 +21,7 @@ Ils ont utilisé PREVAIL et le vérificateur C
 libbpf peut permettre de générer des codes ELF
 
 #### Strings
-> ([[Rapport_PSTL-eBPF.pdf#page=6&selection=27,61,54,18&color=note|Rapport_PSTL-eBPF, p.6]])
-> Nous utilisons un fichier “sectionName” dans lequel on écrit le nom de la section de code octet du fichier ELF et à l’aide de la bibliothèque que nous utilisons pour charger le fichier binaire ELF, nous récupérons le code octet du programme source. Pour récupérer les données des chaînes de caractère nous utilisons un script qui appelle la commande “objcopy” et copie la section “.rodata” du fichier ELF dans un autre fichier qu’on appelle “strings”.
-
+[[Rapport_PSTL-eBPF.pdf#page=9&selection=34,0,34,34&color=yellow|Rapport_PSTL-eBPF, p.9]]
 Ils font une manip pour récupérer les strings
 
 #### Outils 

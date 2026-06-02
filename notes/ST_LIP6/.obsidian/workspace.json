@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "450cb73a69aa65bf",
+        "id": "96e054e74dccdd0d",
         "type": "tabs",
         "children": [
           {
-            "id": "56a8ed88a4e6760c",
+            "id": "45805bf14535bf7d",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "todo.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "todo"
             }
           }
         ]
@@ -74,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 296.5
   },
   "right": {
     "id": "5d342c0962988677",
@@ -109,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "todo.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from todo"
             }
           },
           {
@@ -165,7 +170,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -181,29 +187,30 @@
       "pdf-plus:PDF++: Toggle auto-paste": false
     }
   },
-  "active": "56a8ed88a4e6760c",
+  "active": "45805bf14535bf7d",
   "lastOpenFiles": [
-    "pdf/lib/verifier_review.pdf",
-    "autre/Dé-Assembleur.md",
-    "pdf/lib/Unconfirmed 585068.crdownload",
-    "autre/c_to_ebpf.md",
-    "todo.md",
-    "sigles.md",
     "ressources.md",
+    "todo.md",
     "autre/Instruction Set Architecture.md",
-    "day/2026_06_01.md",
     "autre/Sections.md",
-    "pdf/lib/Rapport_PSTL-eBPF.pdf",
     "autre/Rapport_PSTL.md",
     "autre/Jeux de Test.md",
-    "autre/C_to_EBPF.md",
-    "pdf/sujet_stage.pdf",
-    "pdf/lib/automatic_synthesis.pdf",
-    "pdf/lib/book.pdf",
+    "autre/Dé-Assembleur.md",
+    "sigles.md",
+    "autre/c_to_ebpf.md",
+    "pdf/lib/Rapport_PSTL-eBPF.pdf",
     "pdf/lib/incremental.pdf",
-    "pdf/lib/static_analysis.pdf",
     "pdf/lib/ebpf_wasm.pdf",
-    "pdf/lib/Unconfirmed 474416.crdownload",
+    "pdf/lib/automatic_synthesis.pdf",
+    "pdf/sujet_stage.pdf",
+    "day/2026_06_02.md",
+    "pdf/lib/book.pdf",
+    "pdf/lib/verifier_review.pdf",
+    "pdf/lib/thesis_monat.pdf",
+    "pdf/lib/static_analysis.pdf",
+    "day/2026_06_01.md",
+    "pdf/lib/Unconfirmed 585068.crdownload",
+    "autre/C_to_EBPF.md",
     "ia.md",
     "autre/questions.md",
     "Rapport_PSTL.md",
@@ -216,7 +223,6 @@
     "obsidian/autre/questions.md",
     "obsidian/autre/notes.md",
     "obsidian/autre/Instruction Set Architecture.md",
-    "obsidian/autre/C_to_EBPF.md",
-    "obsidian/Ressources.md"
+    "obsidian/autre/C_to_EBPF.md"
   ]
 }
