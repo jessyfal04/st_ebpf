@@ -36,7 +36,7 @@ while read -r section; do
     name="${basename}_${safe_section}"
 
     llvm-objcopy --dump-section "$section=out/$basename/code/$name.bin" "$obj" /dev/null #binaire
-    od --address-radix n --format x1 --output-duplicates --width 8 "out/$basename/code/$name.bin" > "out/$basename/code/$name.hex" #hexadecimal
+    od --address-radix n --format x1 --output-duplicates --width 8 "out/$basename/code/$name.bin" | tr -d ' ' > "out/$basename/code/$name.hex" #hexadecimal
     llvm-objdump -dSr --full-leading-addr --section="$section" "$obj" > "out/$basename/code/$name.txt" #code humain
 
     echo "Section $name extraite."

@@ -1,3 +1,7 @@
+# Opérations
+- C'est quoi les opération signées ??
+- https://www.rfc-editor.org/rfc/rfc9669.html#section-4.1-15
+
 # Décodeur
 - Comprendre les instruction opcode et registres ect... - mini programme qui affiche le code de l'instruction
 

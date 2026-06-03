@@ -1,22 +1,14 @@
+open Instruction
 
-(* Prends un chemin avec que des bits dedans *)
+let () =
+  (* On récupère depuis l'argument *)
+  let chemin = Sys.argv.(1) in
 
-(* Lis par ligne de 8 à 8 octets *)
+  (* On ouvre le TEXT .hex *)
+  let text = open_in chemin in
 
-(* opcode sur 8 bits *)
+  (* On parse les lignes et on affiche *)
+  parse_lines text Pp.print_instr;
 
-(* dst_reg sur 4 bis *)
-
-(* src_reg sur 4 bits *)
-
-(* offset sur 16 bits *)
-
-(* imm sur 32 bits *)
-
-
-
-(* Puis pp print vers le bon dossier! *)
-
-(* Ajouter le resolt de types et de reloc aussi *)
-
-(* *)
+  (* On ferme le fichier *)
+  close_in text
