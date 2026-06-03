@@ -12,3 +12,11 @@
 (* offset sur 16 bits *)
 
 (* imm sur 32 bits *)
+
+
+
+(* Puis pp print vers le bon dossier! *)
+
+(* Ajouter le resolt de types et de reloc aussi *)
+
+(* *)

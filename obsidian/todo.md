@@ -26,8 +26,6 @@ Pourquoi pas 0 ?
 	- les programmes privilégiés ? , c'est mentionné dans l'article "Simple and Precise Static Analysis"
 # Next
 - Lire thèse qui explique MOPSA
-- Mini Parser : 
-	- Tenter de parser qq les opcodes de ebpf depuis le code-octet
 - Créateur d'AST
 - Voir ce qu'on peut réutiliser de C
 - Model. noyau linux pour intéractions avec lui

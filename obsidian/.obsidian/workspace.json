@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "autre/Sections.md",
+                "file": "todo.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Sections"
+              "title": "todo"
             }
           }
         ],
@@ -204,15 +204,15 @@
   },
   "active": "45805bf14535bf7d",
   "lastOpenFiles": [
+    "autre/Instruction Set Architecture.md",
+    "autre/Fonctions.md",
+    "autre/Sections.md",
     "pdf/lib/Formal Semantics ebpf ISA.pdf",
     "pdf/lib/Unconfirmed 20351.crdownload",
     "autre/Rapport_PSTL.md",
     "autre/Jeux de Test.md",
-    "autre/Instruction Set Architecture.md",
-    "autre/Fonctions.md",
     "autre/Dé-Assembleur.md",
     "autre/c_to_ebpf.md",
-    "autre/Sections.md",
     "todo.md",
     "Pasted image 20260603102954.png",
     "Pasted image 20260603103336.png",
@@ -229,7 +229,6 @@
     "pdf/sujet_stage.pdf",
     "pdf/lib/book.pdf",
     "pdf/lib/verifier_review.pdf",
-    "pdf/lib/thesis_monat.pdf",
     "day/2026_06_01.md",
     "autre/C_to_EBPF.md",
     "ia.md",
