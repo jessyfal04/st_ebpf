@@ -1,0 +1,43 @@
+
+./res/abs.o:	file format elf64-bpf
+
+Disassembly of section .text:
+
+0000000000000000 <my_abs>:
+; static int my_abs(int v) {
+       0:	63 1a f8 ff 00 00 00 00	*(u32 *)(r10 - 0x8) = w1
+; 	if (v < 0) return -v;
+       1:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+       2:	66 01 05 00 ff ff ff ff	if w1 s> -0x1 goto +0x5 <my_abs+0x40>
+       3:	05 00 00 00 00 00 00 00	goto +0x0 <my_abs+0x20>
+       4:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+       5:	84 01 00 00 00 00 00 00	w1 = -w1
+       6:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+       7:	05 00 03 00 00 00 00 00	goto +0x3 <my_abs+0x58>
+; 	return v;
+       8:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+       9:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      10:	05 00 00 00 00 00 00 00	goto +0x0 <my_abs+0x58>
+; }
+      11:	61 a0 fc ff 00 00 00 00	w0 = *(u32 *)(r10 - 0x4)
+      12:	95 00 00 00 00 00 00 00	exit
+
+0000000000000068 <my_min>:
+; static int my_min(int a, int b) {
+      13:	63 1a f8 ff 00 00 00 00	*(u32 *)(r10 - 0x8) = w1
+      14:	63 2a f4 ff 00 00 00 00	*(u32 *)(r10 - 0xc) = w2
+; 	if (a < b) return a;
+      15:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+      16:	61 a2 f4 ff 00 00 00 00	w2 = *(u32 *)(r10 - 0xc)
+      17:	7e 21 04 00 00 00 00 00	if w1 s>= w2 goto +0x4 <my_min+0x48>
+      18:	05 00 00 00 00 00 00 00	goto +0x0 <my_min+0x30>
+      19:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+      20:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      21:	05 00 03 00 00 00 00 00	goto +0x3 <my_min+0x60>
+; 	return b;
+      22:	61 a1 f4 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0xc)
+      23:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      24:	05 00 00 00 00 00 00 00	goto +0x0 <my_min+0x60>
+; }
+      25:	61 a0 fc ff 00 00 00 00	w0 = *(u32 *)(r10 - 0x4)
+      26:	95 00 00 00 00 00 00 00	exit

@@ -1,0 +1,36 @@
+There are 27 section headers, starting at offset 0x12e8:
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .strtab           STRTAB          0000000000000000 0011e4 0000fe 00      0   0  1
+  [ 2] .text             PROGBITS        0000000000000000 000040 0000e0 00  AX  0   0  8
+  [ 3] .rel.text         REL             0000000000000000 000cd0 000020 10   I 26   2  8
+  [ 4] xdp               PROGBITS        0000000000000000 000120 0000b0 00  AX  0   0  8
+  [ 5] .relxdp           REL             0000000000000000 000cf0 000020 10   I 26   4  8
+  [ 6] license           PROGBITS        0000000000000000 0001d0 000004 00  WA  0   0  1
+  [ 7] .debug_abbrev     PROGBITS        0000000000000000 0001d4 0000a3 00      0   0  1
+  [ 8] .debug_info       PROGBITS        0000000000000000 000277 0000ca 00      0   0  1
+  [ 9] .rel.debug_info   REL             0000000000000000 000d10 000050 10   I 26   8  8
+  [10] .debug_rnglists   PROGBITS        0000000000000000 000341 000019 00      0   0  1
+  [11] .debug_str_offsets PROGBITS        0000000000000000 00035a 000058 00      0   0  1
+  [12] .rel.debug_str_offsets REL             0000000000000000 000d60 000140 10   I 26  11  8
+  [13] .debug_str        PROGBITS        0000000000000000 0003b2 0000ef 01  MS  0   0  1
+  [14] .debug_addr       PROGBITS        0000000000000000 0004a1 000028 00      0   0  1
+  [15] .rel.debug_addr   REL             0000000000000000 000ea0 000040 10   I 26  14  8
+  [16] .BTF              PROGBITS        0000000000000000 0004cc 00026c 00      0   0  4
+  [17] .rel.BTF          REL             0000000000000000 000ee0 000010 10   I 26  16  8
+  [18] .BTF.ext          PROGBITS        0000000000000000 000738 000240 00      0   0  4
+  [19] .rel.BTF.ext      REL             0000000000000000 000ef0 000210 10   I 26  18  8
+  [20] .debug_frame      PROGBITS        0000000000000000 000978 000058 00      0   0  8
+  [21] .rel.debug_frame  REL             0000000000000000 001100 000060 10   I 26  20  8
+  [22] .debug_line       PROGBITS        0000000000000000 0009d0 000115 00      0   0  1
+  [23] .rel.debug_line   REL             0000000000000000 001160 000080 10   I 26  22  8
+  [24] .debug_line_str   PROGBITS        0000000000000000 000ae5 000068 01  MS  0   0  1
+  [25] .llvm_addrsig     LLVM_ADDRSIG    0000000000000000 0011e0 000004 00   E 26   0  1
+  [26] .symtab           SYMTAB          0000000000000000 000b50 000180 18      1  12  8
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), p (processor specific)

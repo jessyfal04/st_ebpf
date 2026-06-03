@@ -1,0 +1,49 @@
+
+./res/abs.o:	file format elf64-bpf
+
+Disassembly of section xdp:
+
+0000000000000000 <xdp_demo>:
+; {
+       0:	7b 1a f0 ff 00 00 00 00	*(u64 *)(r10 - 0x10) = r1
+       1:	b4 01 00 00 fe ff ff ff	w1 = -0x2
+; 	int x = -2;
+       2:	63 1a ec ff 00 00 00 00	*(u32 *)(r10 - 0x14) = w1
+       3:	b4 01 00 00 02 00 00 00	w1 = 0x2
+; 	int y = 2;
+       4:	63 1a e8 ff 00 00 00 00	*(u32 *)(r10 - 0x18) = w1
+; 	if (my_abs(x) != my_abs(y))
+       5:	61 a1 ec ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x14)
+       6:	85 10 00 00 ff ff ff ff	call -0x1
+		0000000000000030:  R_BPF_64_32	.text
+       7:	63 0a e0 ff 00 00 00 00	*(u32 *)(r10 - 0x20) = w0
+       8:	61 a1 e8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x18)
+       9:	85 10 00 00 ff ff ff ff	call -0x1
+		0000000000000048:  R_BPF_64_32	.text
+      10:	bc 01 00 00 00 00 00 00	w1 = w0
+      11:	61 a0 e0 ff 00 00 00 00	w0 = *(u32 *)(r10 - 0x20)
+      12:	1e 10 04 00 00 00 00 00	if w0 == w1 goto +0x4 <xdp_demo+0x88>
+      13:	05 00 00 00 00 00 00 00	goto +0x0 <xdp_demo+0x70>
+      14:	b4 01 00 00 00 00 00 00	w1 = 0x0
+; 		return XDP_ABORTED;
+      15:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      16:	05 00 0c 00 00 00 00 00	goto +0xc <xdp_demo+0xe8>
+; 	if (my_min(x, y) != x)
+      17:	61 a1 ec ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x14)
+      18:	61 a2 e8 ff 00 00 00 00	w2 = *(u32 *)(r10 - 0x18)
+      19:	85 10 00 00 0c 00 00 00	call 0xc
+		0000000000000098:  R_BPF_64_32	.text
+      20:	61 a1 ec ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x14)
+      21:	1e 10 04 00 00 00 00 00	if w0 == w1 goto +0x4 <xdp_demo+0xd0>
+      22:	05 00 00 00 00 00 00 00	goto +0x0 <xdp_demo+0xb8>
+      23:	b4 01 00 00 00 00 00 00	w1 = 0x0
+; 		return XDP_ABORTED;
+      24:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      25:	05 00 03 00 00 00 00 00	goto +0x3 <xdp_demo+0xe8>
+      26:	b4 01 00 00 02 00 00 00	w1 = 0x2
+; 	return XDP_PASS;
+      27:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      28:	05 00 00 00 00 00 00 00	goto +0x0 <xdp_demo+0xe8>
+; }
+      29:	61 a0 fc ff 00 00 00 00	w0 = *(u32 *)(r10 - 0x4)
+      30:	95 00 00 00 00 00 00 00	exit
