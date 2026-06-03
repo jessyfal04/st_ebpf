@@ -1,0 +1,2 @@
+   %   s  \0   H   e   l   l   o       W   o   r   l   d       f
+   r   o   m       d   i   r   e   c   t  \n  \0

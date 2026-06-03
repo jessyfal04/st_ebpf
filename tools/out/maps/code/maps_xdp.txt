@@ -6,7 +6,6 @@ Disassembly of section xdp:
 0000000000000000 <xdp_demo>:
 ; {
        0:	7b 1a f0 ff 00 00 00 00	*(u64 *)(r10 - 0x10) = r1
-       
        1:	b4 01 00 00 00 00 00 00	w1 = 0x0
 ; 	bpf_map_update_elem(&map, &(__u32){0}, &(__u32){42}, BPF_ANY);
        2:	63 1a c8 ff 00 00 00 00	*(u32 *)(r10 - 0x38) = w1
