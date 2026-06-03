@@ -39,3 +39,10 @@ bpf_get_current_pid_tgid()
 -> 0:	85 00 00 00 0e 00 00 00	call 0xe
 -> FN(get_current_pid_tgid, 14, ##ctx)		\
 ```
+
+Pattern quand on fait des appel avec adresses
+```c
+       9:	bf a2 00 00 00 00 00 00	r2 = r10
+      10:	07 02 00 00 ec ff ff ff	r2 += -0x14
+```
+

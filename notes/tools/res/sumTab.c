@@ -1,20 +1,16 @@
 #include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
 
-#define taille 4
-int tab[taille] = { 1, 2, 3, 4 };
+int tab[3] = { 1, 2, 3 };
 
 SEC("xdp")
 int xdp_demo(void *ctx)
 {
-	int sum = 0;
-	for (int i = 0; i < taille; i++) {
-		int sum = tab[i];
-	}
+	int sum = tab[0] + tab[1] + tab[2];
+	
+	bpf_printk("Res: %d\n", sum);
 
-	bpf_printk("Resultat : %d", sum);
-
-	return XDP_ABORTED;
+	return XDP_PASS;
 }
 
 char _license[] SEC("license") = "GPL";

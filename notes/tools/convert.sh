@@ -11,5 +11,5 @@ mkdir -p "out/$basename"
 clang -target bpfel -O0 -g \
     -I/usr/include/x86_64-linux-gnu \
     -I../other/bpftool/src/libbpf/include \
-    -c "$c" -o "out/$basename/$basename.o"
-llvm-objdump -dSr out/$basename/$basename.o > out/$basename/$basename.dis
+    -c "$c" -o "res/$basename.o"
+# llvm-objdump -dSr out/$basename/$basename.o > out/$basename/$basename.dis

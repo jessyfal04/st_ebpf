@@ -5,7 +5,7 @@ Dans [[static_analysis.pdf]], ils font une abstraction
 Dans [[automatic_synthesis.pdf]] ils ne font que l'opérateur
 
 # Décodage
-## sectionName : code
+## TEXT code
 - Mode TEXT non nul
 - Notre code exécutable
 
@@ -47,6 +47,83 @@ int xdp_demo(void *ctx)
 ```
 
 
+## TEXT .text
+Contient nos déclarations de fonctions
+```c
+static int odd(int v);
+static int even(int v);
+
+static int odd(int v) {
+	if (v == 0) return 0;
+	return even(v - 1);
+}
+
+static int even(int v) {
+	if (v == 0) return 1;
+	return odd(v - 1);
+}
+```
+
+```shell
+0000000000000000 <odd>:
+; static int odd(int v) {
+       0:	63 1a f8 ff 00 00 00 00	*(u32 *)(r10 - 0x8) = w1
+; 	if (v == 0) return 0;
+       1:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+       2:	56 01 04 00 00 00 00 00	if w1 != 0x0 goto +0x4 <odd+0x38>
+       3:	05 00 00 00 00 00 00 00	goto +0x0 <odd+0x20>
+       4:	b4 01 00 00 00 00 00 00	w1 = 0x0
+; 	if (v == 0) return 0;
+       5:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+       6:	05 00 05 00 00 00 00 00	goto +0x5 <odd+0x60>
+; 	return even(v - 1);
+       7:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+       8:	04 01 00 00 ff ff ff ff	w1 += -0x1
+       9:	85 10 00 00 04 00 00 00	call 0x4
+      10:	63 0a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w0
+      11:	05 00 00 00 00 00 00 00	goto +0x0 <odd+0x60>
+; }
+      12:	61 a0 fc ff 00 00 00 00	w0 = *(u32 *)(r10 - 0x4)
+      13:	95 00 00 00 00 00 00 00	exit
+
+0000000000000070 <even>:
+; static int even(int v) {
+      14:	63 1a f8 ff 00 00 00 00	*(u32 *)(r10 - 0x8) = w1
+; 	if (v == 0) return 1;
+      15:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+      16:	56 01 04 00 00 00 00 00	if w1 != 0x0 goto +0x4 <even+0x38>
+      17:	05 00 00 00 00 00 00 00	goto +0x0 <even+0x20>
+      18:	b4 01 00 00 01 00 00 00	w1 = 0x1
+; 	if (v == 0) return 1;
+      19:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      20:	05 00 05 00 00 00 00 00	goto +0x5 <even+0x60>
+; 	return odd(v - 1);
+      21:	61 a1 f8 ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x8)
+      22:	04 01 00 00 ff ff ff ff	w1 += -0x1
+      23:	85 10 00 00 e8 ff ff ff	call -0x18
+      24:	63 0a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w0
+      25:	05 00 00 00 00 00 00 00	goto +0x0 <even+0x60>
+; }
+      26:	61 a0 fc ff 00 00 00 00	w0 = *(u32 *)(r10 - 0x4)
+      27:	95 00 00 00 00 00 00 00	exit
+```
+
+Les offset sont dans les symboles :
+Non Static :
+```
+      23:	85 10 00 00 ff ff ff ff	call -0x1
+		00000000000000b8:  R_BPF_64_32	odd
+		
+0	70	T	odd
+
+```
+Static :
+```
+      23:	85 10 00 00 e8 ff ff ff	call -0x18
+      
+0	70	t	odd
+
+```
 ## DATA .rodata en lecture seule / constantes
 Chaîne  
 ```c

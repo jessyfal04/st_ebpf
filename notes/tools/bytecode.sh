@@ -6,32 +6,58 @@ fi
 
 obj=$1
 
-# On crée un dossier pour stocker les sections extraites
+# On crée un dossier pour stocker les extractions
 basename=$(basename "$obj" .o)
-mkdir -p "out/$basename"
 
-# Listage des sections présentes
-readelf -S $obj --wide > "out/$basename/_sections_readelf.txt"
-llvm-objdump -h "$obj" > "out/$basename/_sections_llvm-objdump.txt"
+# Sous-dossiers résurssivement
+for dir in sections symb code reloc data; do
+    mkdir -p "out/$basename/$dir"
+done
 
-# Extraction des symboles (en TSV)
+# Listage des SECTION présentes
+readelf -S $obj --wide > "out/$basename/sections/_sections_readelf.txt"
+llvm-objdump -h "$obj" > "out/$basename/sections/_sections_llvm-objdump.txt"
 {
-    printf "VALUE\tSIZE\tTYPE\tNAME\n"
-    llvm-nm -S --defined-only "$obj" | awk 'NF >= 4 { print $1 "\t" $2 "\t" $3 "\t" $4 }'
-} > "out/$basename/${basename}_symb.tsv"
-echo "Symboles extraits."
+    printf "IDX\tNAME\tSIZE\tVMA\tTYPE\n"
+    llvm-objdump -h "$obj" |
+    awk '
+        /^[[:space:]]*[0-9]+[[:space:]]+/ {
+            print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5
+        }
+    '
+} > "out/$basename/sections/${basename}_sections.tsv"
 
-# Extrait la section de code "sectionName" (type TEXT) et non vide
-sectionName=$(llvm-objdump -h "$obj" | awk '$5 == "TEXT" && $3 != "00000000" { print $2; exit }')
+# Extrait la section de CODE (type TEXT) et non vides, et de leurs sections si non vide
+llvm-objdump -h "$obj" |
+awk '$5 == "TEXT" && $3 != "00000000" { print $2 }' |
 
-safe_sectionName=${sectionName//\//_}
-name="${basename}_${safe_sectionName}"
+while read -r section; do
+    safe_section=${section//\//_}
+    name="${basename}_${safe_section}"
 
-llvm-objcopy --dump-section "$sectionName=out/$basename/$name.bin" "$obj" /dev/null #binaire
-od --address-radix n --format x1 --output-duplicates --width 8 "out/$basename/$name.bin" > "out/$basename/$name.hex" #hexadecimal
-llvm-objdump -dSr --section="$sectionName" "$obj" > "out/$basename/$name.txt" #code humain
+    llvm-objcopy --dump-section "$section=out/$basename/code/$name.bin" "$obj" /dev/null #binaire
+    od --address-radix n --format x1 --output-duplicates --width 8 "out/$basename/code/$name.bin" > "out/$basename/code/$name.hex" #hexadecimal
+    llvm-objdump -dSr --full-leading-addr --section="$section" "$obj" > "out/$basename/code/$name.txt" #code humain
 
-echo "Section $name extraite."
+    echo "Section $name extraite."
+
+    # Extraction des RELOCATIONS (.rel)depuis la section TEXT courante, si elle existe
+    rel_section=".rel${section}"
+    llvm-objdump -h "$obj" |
+    awk -v rel="$rel_section" '$2 == rel && $3 != "00000000" { print $2 }' |
+    while read -r rel_section; do
+        name_reloc="${basename}_${safe_section}_reloc"
+
+        llvm-objdump -r --section=$rel_section "$obj" |
+        awk '
+            /^OFFSET[[:space:]]+TYPE[[:space:]]+VALUE$/ { print "OFFSET\tTYPE\tVALUE"; next }
+            /^[0-9a-f]+[[:space:]]+R_/ { printf "%s\t%s\t%s\n", $1, $2, $3; next }
+        ' > "out/$basename/reloc/${name_reloc}.tsv"
+
+        echo "Section ${name_reloc}.tsv extraite."
+    done
+
+done
 
 # Extraction DATA (licence et .rodata, .data, .bss)
 llvm-objdump -h "$obj" |
@@ -41,19 +67,31 @@ while read -r section; do
     safe_section=${section//\//_}
     name="${basename}_${safe_section}"
 
-    llvm-objcopy --dump-section "$section=out/$basename/${name}.bin" "$obj" /dev/null
-    od --address-radix n --format c --output-duplicates  "out/$basename/${name}.bin" > "out/$basename/${name}.txt"
+    llvm-objcopy --dump-section "$section=out/$basename/data/${name}.bin" "$obj" /dev/null
+    od --address-radix n --format c --output-duplicates  "out/$basename/data/${name}.bin" > "out/$basename/data/${name}.txt"
     
     echo "Section $name extraite."
 done
 
-# Extraction relocation (.rel$sectionName)
-rel_section=".rel${sectionName}"
-name_reloc="${basename}_reloc"
+# Extraction des SYMBOLES
+{
+    printf "VALUE\tSIZE\tTYPE\tNAME\n"
+    llvm-nm -S --defined-only "$obj" | awk 'NF >= 4 { print $1 "\t" $2 "\t" $3 "\t" $4 }'
+} > "out/$basename/symb/${basename}_symb.tsv"
+echo "Symboles extraits."
 
-llvm-objdump -r --section=$rel_section "$obj" |
-awk '
-    /^OFFSET[[:space:]]+TYPE[[:space:]]+VALUE$/ { print "OFFSET\tTYPE\tVALUE"; next }
-    /^[0-9a-f]+[[:space:]]+R_/ { printf "%s\t%s\t%s\n", $1, $2, $3; next }
-' > "out/$basename/${name_reloc}.tsv"
-echo "Section ${name_reloc}.tsv extraite."
+{
+    printf "VALUE\tSIZE\tNDX\tNAME\n"
+    llvm-readelf -s --wide "$obj" |
+    awk '
+        /^[[:space:]]*[0-9]+:/ {
+            print $2 "\t" $3 "\t" $7 "\t" $8
+        }
+    '
+} > "out/$basename/symb/${basename}_symbSec.tsv"
+echo "Symboles avec section extraits."
+
+# Extraction des types (.BTF)
+
+
+
