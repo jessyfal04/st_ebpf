@@ -1,0 +1,11 @@
+[1] FUNC_PROTO '(anon)' ret_type_id=2 vlen=1
+	'(anon)' type_id=3
+[2] INT 'int' size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+[3] PTR '(anon)' type_id=0
+[4] FUNC 'xdp_demo' type_id=1 linkage=global
+[5] INT 'char' size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
+[6] ARRAY '(anon)' type_id=5 index_type_id=7 nr_elems=4
+[7] INT '__ARRAY_SIZE_TYPE__' size=4 bits_offset=0 nr_bits=32 encoding=(none)
+[8] VAR '_license' type_id=6, linkage=global
+[9] DATASEC 'license' size=0 vlen=1
+	type_id=8 offset=0 size=4 (VAR '_license')

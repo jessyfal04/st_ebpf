@@ -22,7 +22,7 @@
             }
           },
           {
-            "id": "34dc3894a8a55fd8",
+            "id": "45805bf14535bf7d",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -33,22 +33,6 @@
               },
               "icon": "lucide-file",
               "title": "todo"
-            }
-          },
-          {
-            "id": "45805bf14535bf7d",
-            "type": "leaf",
-            "state": {
-              "type": "pdf",
-              "state": {
-                "file": "pdf/lib/static_analysis.pdf",
-                "page": 1,
-                "left": -12,
-                "top": 796,
-                "zoom": 1.4019607843137254
-              },
-              "icon": "lucide-file-text",
-              "title": "static_analysis"
             }
           }
         ],
@@ -218,12 +202,15 @@
       "bases:Create new base": false
     }
   },
-  "active": "34dc3894a8a55fd8",
+  "active": "45805bf14535bf7d",
   "lastOpenFiles": [
+    "ressources.md",
     "day/2026_06_03.md",
+    "pdf/lib/static_analysis.pdf",
+    "pdf/lib/automatic_synthesis.pdf",
+    "day/2026_06_02.md",
     "todo.md",
     "Pasted image 20260603103336.png",
-    "pdf/lib/static_analysis.pdf",
     "Pasted image 20260603102954.png",
     "autre/Sections.md",
     "autre/Rapport_PSTL.md",
@@ -232,14 +219,11 @@
     "autre/Fonctions.md",
     "autre/Dé-Assembleur.md",
     "autre/c_to_ebpf.md",
-    "day/2026_06_02.md",
     "pdf/lib/Rapport_PSTL-eBPF.pdf",
     "notes.md",
-    "ressources.md",
     "sigles.md",
     "pdf/lib/incremental.pdf",
     "pdf/lib/ebpf_wasm.pdf",
-    "pdf/lib/automatic_synthesis.pdf",
     "pdf/sujet_stage.pdf",
     "pdf/lib/book.pdf",
     "pdf/lib/verifier_review.pdf",

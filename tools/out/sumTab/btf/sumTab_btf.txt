@@ -1,0 +1,20 @@
+[1] FUNC_PROTO '(anon)' ret_type_id=2 vlen=1
+	'(anon)' type_id=3
+[2] INT 'int' size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+[3] PTR '(anon)' type_id=0
+[4] FUNC 'xdp_demo' type_id=1 linkage=global
+[5] ARRAY '(anon)' type_id=2 index_type_id=6 nr_elems=3
+[6] INT '__ARRAY_SIZE_TYPE__' size=4 bits_offset=0 nr_bits=32 encoding=(none)
+[7] VAR 'tab' type_id=5, linkage=global
+[8] CONST '(anon)' type_id=9
+[9] INT 'char' size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
+[10] ARRAY '(anon)' type_id=8 index_type_id=6 nr_elems=9
+[11] VAR 'xdp_demo.____fmt' type_id=10, linkage=static
+[12] ARRAY '(anon)' type_id=9 index_type_id=6 nr_elems=4
+[13] VAR '_license' type_id=12, linkage=global
+[14] DATASEC '.data' size=0 vlen=1
+	type_id=7 offset=0 size=12 (VAR 'tab')
+[15] DATASEC '.rodata' size=0 vlen=1
+	type_id=11 offset=0 size=9 (VAR 'xdp_demo.____fmt')
+[16] DATASEC 'license' size=0 vlen=1
+	type_id=13 offset=0 size=4 (VAR '_license')

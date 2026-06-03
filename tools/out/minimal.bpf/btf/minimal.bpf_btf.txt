@@ -1,0 +1,19 @@
+[1] PTR '(anon)' type_id=0
+[2] FUNC_PROTO '(anon)' ret_type_id=3 vlen=1
+	'ctx' type_id=1
+[3] INT 'int' size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+[4] FUNC 'handle_tp' type_id=2 linkage=global
+[5] INT 'char' size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
+[6] ARRAY '(anon)' type_id=5 index_type_id=7 nr_elems=13
+[7] INT '__ARRAY_SIZE_TYPE__' size=4 bits_offset=0 nr_bits=32 encoding=(none)
+[8] VAR 'LICENSE' type_id=6, linkage=global
+[9] VAR 'my_pid' type_id=3, linkage=global
+[10] CONST '(anon)' type_id=5
+[11] ARRAY '(anon)' type_id=10 index_type_id=7 nr_elems=28
+[12] VAR 'handle_tp.____fmt' type_id=11, linkage=static
+[13] DATASEC '.bss' size=0 vlen=1
+	type_id=9 offset=0 size=4 (VAR 'my_pid')
+[14] DATASEC '.rodata' size=0 vlen=1
+	type_id=12 offset=0 size=28 (VAR 'handle_tp.____fmt')
+[15] DATASEC 'license' size=0 vlen=1
+	type_id=8 offset=0 size=13 (VAR 'LICENSE')

@@ -10,7 +10,7 @@ obj=$1
 basename=$(basename "$obj" .o)
 
 # Sous-dossiers résurssivement
-for dir in sections symb code reloc data; do
+for dir in sections symb code reloc data btf; do
     mkdir -p "out/$basename/$dir"
 done
 
@@ -92,6 +92,6 @@ echo "Symboles extraits."
 echo "Symboles avec section extraits."
 
 # Extraction des types (.BTF)
-
+bpftool btf dump file $obj > "out/$basename/btf/${basename}_btf.txt"
 
 
