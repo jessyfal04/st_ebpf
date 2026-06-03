@@ -1,7 +1,4 @@
 # Décodeur
-- Types
-	- Infos de types des structures et des maps
-	- ebpf elf map type section ".BTF" ? Où sont les types ?
 - Comprendre les instruction opcode et registres ect... - mini programme qui affiche le code de l'instruction
 
 # Question
