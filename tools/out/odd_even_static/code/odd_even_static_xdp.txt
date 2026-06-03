@@ -1,0 +1,38 @@
+
+./res/odd_even_static.o:	file format elf64-bpf
+
+Disassembly of section xdp:
+
+0000000000000000 <xdp_demo>:
+; {
+       0:	7b 1a f0 ff 00 00 00 00	*(u64 *)(r10 - 0x10) = r1
+       1:	b4 01 00 00 02 00 00 00	w1 = 0x2
+; 	int x = 2;
+       2:	63 1a ec ff 00 00 00 00	*(u32 *)(r10 - 0x14) = w1
+; 	if (odd(x) != 0)
+       3:	61 a1 ec ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x14)
+       4:	85 10 00 00 ff ff ff ff	call -0x1
+		0000000000000020:  R_BPF_64_32	.text
+       5:	16 00 04 00 00 00 00 00	if w0 == 0x0 goto +0x4 <xdp_demo+0x50>
+       6:	05 00 00 00 00 00 00 00	goto +0x0 <xdp_demo+0x38>
+       7:	b4 01 00 00 00 00 00 00	w1 = 0x0
+; 		return XDP_ABORTED;
+       8:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+       9:	05 00 0a 00 00 00 00 00	goto +0xa <xdp_demo+0xa0>
+; 	if (even(x) != 1)
+      10:	61 a1 ec ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x14)
+      11:	85 10 00 00 0d 00 00 00	call 0xd
+		0000000000000058:  R_BPF_64_32	.text
+      12:	16 00 04 00 01 00 00 00	if w0 == 0x1 goto +0x4 <xdp_demo+0x88>
+      13:	05 00 00 00 00 00 00 00	goto +0x0 <xdp_demo+0x70>
+      14:	b4 01 00 00 00 00 00 00	w1 = 0x0
+; 		return XDP_ABORTED;
+      15:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      16:	05 00 03 00 00 00 00 00	goto +0x3 <xdp_demo+0xa0>
+      17:	b4 01 00 00 02 00 00 00	w1 = 0x2
+; 	return XDP_PASS;
+      18:	63 1a fc ff 00 00 00 00	*(u32 *)(r10 - 0x4) = w1
+      19:	05 00 00 00 00 00 00 00	goto +0x0 <xdp_demo+0xa0>
+; }
+      20:	61 a0 fc ff 00 00 00 00	w0 = *(u32 *)(r10 - 0x4)
+      21:	95 00 00 00 00 00 00 00	exit

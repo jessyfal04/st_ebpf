@@ -1,0 +1,32 @@
+#include <linux/bpf.h>
+#include <bpf/bpf_helpers.h>
+
+// odd and even mutually recursive functions
+static int odd(int v);
+static int even(int v);
+
+static int odd(int v) {
+	if (v == 0) return 0;
+	return even(v - 1);
+}
+
+static int even(int v) {
+	if (v == 0) return 1;
+	return odd(v - 1);
+}
+
+SEC("xdp")
+int xdp_demo(void *ctx)
+{
+	int x = 2;
+	
+	if (odd(x) != 0)
+		return XDP_ABORTED;
+
+	if (even(x) != 1)
+		return XDP_ABORTED;
+
+	return XDP_PASS;
+}
+
+char _license[] SEC("license") = "GPL";

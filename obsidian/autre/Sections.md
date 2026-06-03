@@ -246,7 +246,26 @@ OFFSET           TYPE                     VALUE
   - res est aussi dans .data taille 4, mais offset 4
   
 ## .maps
-TODO
+```c
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__type(key, __u32);
+	__type(value, __u32);
+	__uint(max_entries, 2);
+} map SEC(".maps");
+```
+```
+  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0
+  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0
+```
+
+
+
+map-in-map
+
+```
+
+```
 ## license
 Sert à indiquer la licence du programme, 
 

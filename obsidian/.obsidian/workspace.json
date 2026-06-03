@@ -8,37 +8,21 @@
         "type": "tabs",
         "children": [
           {
-            "id": "34dc3894a8a55fd8",
-            "type": "leaf",
-            "state": {
-              "type": "pdf",
-              "state": {
-                "file": "pdf/lib/static_analysis.pdf",
-                "page": 11,
-                "left": -12,
-                "top": 592,
-                "zoom": 1.4019607843137254
-              },
-              "icon": "lucide-file-text",
-              "title": "static_analysis"
-            }
-          },
-          {
-            "id": "45805bf14535bf7d",
+            "id": "6d15f577f60bb488",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "autre/Instruction Set Architecture.md",
+                "file": "day/2026_06_03.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Instruction Set Architecture"
+              "title": "2026_06_03"
             }
           },
           {
-            "id": "6d15f577f60bb488",
+            "id": "34dc3894a8a55fd8",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -50,9 +34,25 @@
               "icon": "lucide-file",
               "title": "todo"
             }
+          },
+          {
+            "id": "45805bf14535bf7d",
+            "type": "leaf",
+            "state": {
+              "type": "pdf",
+              "state": {
+                "file": "pdf/lib/static_analysis.pdf",
+                "page": 1,
+                "left": -12,
+                "top": 796,
+                "zoom": 1.4019607843137254
+              },
+              "icon": "lucide-file-text",
+              "title": "static_analysis"
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -218,21 +218,25 @@
       "bases:Create new base": false
     }
   },
-  "active": "6d15f577f60bb488",
+  "active": "34dc3894a8a55fd8",
   "lastOpenFiles": [
-    "autre/Instruction Set Architecture.md",
-    "pdf/lib/static_analysis.pdf",
+    "day/2026_06_03.md",
     "todo.md",
-    "pdf/lib/Rapport_PSTL-eBPF.pdf",
+    "Pasted image 20260603103336.png",
+    "pdf/lib/static_analysis.pdf",
+    "Pasted image 20260603102954.png",
     "autre/Sections.md",
-    "day/2026_06_02.md",
-    "notes.md",
     "autre/Rapport_PSTL.md",
     "autre/Jeux de Test.md",
+    "autre/Instruction Set Architecture.md",
+    "autre/Fonctions.md",
     "autre/Dé-Assembleur.md",
+    "autre/c_to_ebpf.md",
+    "day/2026_06_02.md",
+    "pdf/lib/Rapport_PSTL-eBPF.pdf",
+    "notes.md",
     "ressources.md",
     "sigles.md",
-    "autre/c_to_ebpf.md",
     "pdf/lib/incremental.pdf",
     "pdf/lib/ebpf_wasm.pdf",
     "pdf/lib/automatic_synthesis.pdf",
@@ -252,8 +256,6 @@
     "notes/Rapport_PSTL.md",
     "autre/notes.md",
     "obsidian/autre/sigles.md",
-    "obsidian/autre/questions.md",
-    "obsidian/autre/notes.md",
-    "obsidian/autre/Instruction Set Architecture.md"
+    "obsidian/autre/questions.md"
   ]
 }
