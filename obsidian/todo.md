@@ -1,17 +1,23 @@
 # Opérations
 
-- Prendre le chemin vers le dossier plutôt
-- Filtrer les DW avec 64, donner un argument supplémentaire
-- Ensuite dedans 
+- Résourdre  à l'aide des TSV ~ 
+	- Reloc R_BPF_64_64 / 32 via reloc -> symbSec -> section -> formule
+	- 2 types de CALL :
+		- 0 avec helper (maybe afficher nom de fonction)
+		- 1 avec dans le code
 
 - Continuer la partie sur les différences avec les autres projets
 - Lire article avec opérations formelles
 
 - A quoi sert la variable ctx context ? 'r1'
+- label PC
 - Parsing : 
 	- Opérations signés et spéciales avec une certaine valeur de registre
 		- https://www.rfc-editor.org/rfc/rfc9669.html#section-4.1-15
 	- Byte Swap ...
+	- src_reg pour 64-bit Immediate Instructions
+	- Atomic Operations
+	- Jump Instruction avec diff src_reg
 
 
 # Question

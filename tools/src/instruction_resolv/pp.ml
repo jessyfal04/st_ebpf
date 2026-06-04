@@ -69,10 +69,13 @@ let pp_opcode fmt = function
   | JMP32 (src, op) -> fprintf fmt "JMP32(%a,%a)" pp_source src pp_code_jmp op
   | ALU64 (src, op) -> fprintf fmt "ALU64(%a,%a)" pp_source src pp_code_alu op
 
-let rec pp_instr fmt (opcode, dst_reg, src_reg, offset, imm) =
-  fprintf fmt "instr(%a, dst=%d, src=%d, offset=%d, imm=%ld)"
-    pp_opcode opcode dst_reg src_reg offset imm
-and pp_instrs fmt ins = pp_lst_brk pp_instr fmt ins
+let pp_instr fmt = function
+  | BASIC (opcode, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr(%a, dst=%d, src=%d, offset=%d, imm=%ld)" pp_opcode opcode dst_reg src_reg offset imm
+  | WIDE (opcode, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr64(%a, dst=%d, src=%d, offset=%d, imm=%Ldll)" pp_opcode opcode dst_reg src_reg offset imm
 
-let pp_text instrs =
-  printf "%a@." pp_instrs instrs
+let rec pp_line fmt (n, instr) =
+  fprintf fmt "%d : %a" n  pp_instr instr
+and pp_lines fmt ins = pp_lst_brk pp_line fmt ins
+
+let pp_res res =
+  printf "%a@." pp_lines res

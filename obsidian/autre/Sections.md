@@ -1,9 +1,3 @@
-# Articles
-
-Dans [[Rapport_PSTL-eBPF.pdf]] ils vont extraire sectionName ; rodata mais j'ai l'impression que leur string sont en lecture seule
-Dans [[static_analysis.pdf]], ils font une abstraction
-Dans [[automatic_synthesis.pdf]] ils ne font que l'opérateur
-
 # Décodage
 ## TEXT code
 - Mode TEXT non nul
@@ -232,8 +226,10 @@ OFFSET           TYPE                     VALUE
 ```
 
 
+### Types
 Il y a une formule pour les relocation !!
-`(S + A) / 8 - 1` 
+Relocation : R_BPF_64_64 : `S + A` (pour les load 64)
+Relocation : R_BPF_64_32 : `(S + A) / 8 - 1`  (pour les appels)
 
 (0 + 0)/8 - 1 = -1 car (-1 +1) * 8 = 0
 (0 + 0x70)/8 - 1 = 13 = 0xd car (0xd+1 = 0xe) * 8 = 0x70

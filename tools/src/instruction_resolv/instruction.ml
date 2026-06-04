@@ -13,7 +13,7 @@ let parse16 line byte_index =
   let lo = byte_of_line line byte_index in
   let hi = byte_of_line line (byte_index + 1) in
   let v = lo lor (hi lsl 8) in
-  (v lsl 16) asr 16
+  if v land 0x8000 <> 0 then v - 0x10000 else v
 
 (* 7b1af8ff00000000 4 32 -> int32 *)
 let parse32 line byte_index =
@@ -23,12 +23,18 @@ let parse32 line byte_index =
   let b3 = Int32.shift_left (Int32.of_int (byte_of_line line (byte_index + 3))) 24 in
   Int32.logor b0 (Int32.logor b1 (Int32.logor b2 b3))
 
+let i32_to_i64 x =
+  Int64.logand (Int64.of_int32 x) 0xffffffffL
+
+let parse64 imm next_imm =
+  Int64.logor (i32_to_i64 imm) (Int64.shift_left (i32_to_i64 next_imm) 32)
+
 (* TYPES *)
 (* The size modifier *)
 type size =
 | W (** word = 4B *)
 | H (** half word = 2B *)
-| B (** byte *)
+| B (** byte = 1B *)
 | DW (* double word = 8B *)
 
 (* The mode modifier *)
@@ -92,8 +98,13 @@ type opcode =
 type dst_reg = int (*destination register number (0-10)*)
 type src_reg = int (*the source register number (0-10), except where otherwise specified (64-bit immediate instructions reuse this field for other purposes)*)
 type offset = int (*signed integer offset used with pointer arithmetic*)
-type imm = int32 (*signed integer immediate value*)
-type instr = opcode * dst_reg * src_reg * offset * imm
+type imm32 = int32 (*signed integer immediate value*)
+type imm64 = int64
+type instr = 
+  | BASIC of opcode * dst_reg * src_reg * offset * imm32
+  | WIDE of opcode * dst_reg * src_reg * offset * imm64
+
+type line = int * instr
 
 (* REVOLVERS *)
 (* For load and store instructions (LD, LDX, ST, and STX), the 8-bit opcode field is divided as follows *)
@@ -173,8 +184,14 @@ let opcode_resolver opcode : opcode =
   | 7 -> ALU64 (source_resolver opcode, code_alu_resolver opcode)
   | _ -> failwith "Invalid opcode_resolver"
 
+(* {IMM, DW, LD} cas spécial 64-bit Immediate Instructions *)
+let check64imm (instr : instr) : bool =
+  match instr with
+  | BASIC (LD (DW, IMM), _ , _, _, _) -> true
+  | _ -> false
+
 (* Parse une ligne *)
-let parse_line line : instr =
+let rec parse_line line : instr =
   (* Récupérer le opcode 16 *)
   let opcode = opcode_resolver (byte_of_line line 0) in
   
@@ -186,17 +203,43 @@ let parse_line line : instr =
   let offset = parse16 line 2 in
   (* 32 bits : imm *)
   let imm = parse32 line 4 in
-  (opcode, dst_reg, src_reg, offset, imm)
+  BASIC (opcode, dst_reg, src_reg, offset, imm)
+and parse_line64 prev_instr next_line : instr =
+  match prev_instr, parse_line next_line with
+  (* imm + reserved : unused, set to zero + next_imm:
+second signed integer immediate value *)
+  (* todo table 12 src != 0 *)
+  | BASIC (LD (DW, IMM), dst, 0, off, imm), BASIC (LD (W, IMM), 0, 0, 0, next_imm) ->
+      WIDE (LD (DW, IMM), dst, 0, off, parse64 imm next_imm)
+  | _ -> failwith "parse_line64"
 
 (* Traiter chaque ligne de 8 octects *)
-let rec parse_lines acc text =
+let rec get_instrs acc text : instr list =
   try
     let line = input_line text in
-    
-    (* TODO Vérifier ICI que la ligne n'aurait pas besoin d'un double MOT *)
-
     let instr = parse_line line in
 
-    parse_lines (instr :: acc) text
+    (* Verifier si la ligne a besoin d'un 64 bits*)
+    let instrChecked64 = 
+      if check64imm instr then
+        let line64 = input_line text in
+        parse_line64 instr line64
+      else
+        instr
+    in
+
+    get_instrs (instrChecked64 :: acc) text
+
   with End_of_file ->
-    acc
+    List.rev acc
+
+let rec get_nbLine instrs offset acc : line list =
+  match instrs with
+  | BASIC _ as i :: l -> get_nbLine l (offset+8) ((offset, i) :: acc)
+  | WIDE _ as i :: l -> get_nbLine l (offset+16) ((offset, i) :: acc)
+  | [] -> List.rev acc
+
+let parse_lines text =
+    let instrs = get_instrs [] text in
+    let lines = get_nbLine instrs 0 [] in
+    lines

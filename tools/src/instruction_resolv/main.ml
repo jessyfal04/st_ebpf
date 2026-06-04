@@ -11,21 +11,21 @@ let () =
     |> List.filter (fun x -> Filename.extension x = ".hex")
     |> List.map (fun x -> dir ^ "/code/" ^ x) in
 
-  (* On ouvre le TEXT .hex *)
+  (* On ouvre les .hex *)
   let code_file = List.map (open_in) code_list in
 
   (* On parse les lignes et on affiche *)
-  let code_instrs = List.map (parse_lines []) code_file in
+  let code_res = List.map parse_lines code_file in
 
-  (* On ferme les fichier *)
+  (* On ferme les .hex *)
   let _ = List.map close_in code_file in
 
   (* Print fichier (code_list) + ast (code_instrs) *)
   print_endline "--CODES--";
-  let pairs = List.combine code_list code_instrs in
+  let pairs = List.combine code_list code_res in
   List.iter
-    (fun (fichier, instrs) ->
+    (fun (fichier, res) ->
        print_endline ("\n" ^ fichier);
-       Pp.pp_text instrs)
+       Pp.pp_res res)
     pairs
-  
+
