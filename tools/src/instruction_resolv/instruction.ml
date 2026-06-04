@@ -189,7 +189,7 @@ let parse_line line : instr =
   (opcode, dst_reg, src_reg, offset, imm)
 
 (* Traiter chaque ligne de 8 octects *)
-let rec parse_lines text pp =
+let rec parse_lines acc text =
   try
     let line = input_line text in
     
@@ -197,8 +197,6 @@ let rec parse_lines text pp =
 
     let instr = parse_line line in
 
-    pp instr;
-
-    parse_lines text pp
+    parse_lines (instr :: acc) text
   with End_of_file ->
-    ()
+    acc

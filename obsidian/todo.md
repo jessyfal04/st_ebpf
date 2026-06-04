@@ -1,30 +1,31 @@
 # Opérations
-- C'est quoi les opération signées ??
-- https://www.rfc-editor.org/rfc/rfc9669.html#section-4.1-15
 
-# Décodeur
-- Comprendre les instruction opcode et registres ect... - mini programme qui affiche le code de l'instruction
+- Prendre le chemin vers le dossier plutôt
+- Filtrer les DW avec 64, donner un argument supplémentaire
+- Ensuite dedans 
+
+- Continuer la partie sur les différences avec les autres projets
+- Lire article avec opérations formelles
+
+- A quoi sert la variable ctx context ? 'r1'
+- Parsing : 
+	- Opérations signés et spéciales avec une certaine valeur de registre
+		- https://www.rfc-editor.org/rfc/rfc9669.html#section-4.1-15
+	- Byte Swap ...
+
 
 # Question
-- Chargement binaire -1 ?
-```
-       9:	85 10 00 00 ff ff ff ff	call -0x1
-		0000000000000048:  R_BPF_64_32	even
-```
-Pourquoi pas 0 ?
-![[Pasted image 20260603103336.png]]
-
 - S'occuper des types, des maps (BPF_MAP_TYPE_ARRAY / BPF_MAP_TYPE_HASH) avec .BPF car quand je change le type c'est ici que ça change.
 ![[Pasted image 20260603102954.png]]
 	et des tableaux ou juste considérer que ce sont des cases avec des valeurs ?
 
-- Pourquoi les maps font 20 octet à chaque fois ?
+- Pourquoi les maps font 20 octet à chaque fois ? C'est la struct ? Les données sont dans le noyaux ? Comment les représenter?
 ```
 0000000000000020 32 4 array_of_maps
 0000000000000000 32 4 inner_map
 ```
 
-- Il y a quelque chose de spécial à faire pour :
+- Plus tard, il y a quelque chose de spécial à faire / à détecter pour :
 	- les pointeurs des maps?
 	- les divisions par zéro ? 
 	- les programmes privilégiés ? , c'est mentionné dans l'article "Simple and Precise Static Analysis"

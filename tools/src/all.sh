@@ -9,9 +9,8 @@ for o in ./res/*.o; do
     ./src/bytecode.sh $o
 done
 
-shopt -s globstar nullglob
-for o in ./out/**/code/*.hex; do
-	echo "> Instructions for ${o}"
+for o in ./out/*; do
+	echo "> Resolv ${o}"
 	./src/instructions.sh $o
 done
 

@@ -1,3 +1,5 @@
-hex=$1
+dir=$1
 
-dune exec src/instruction_resolv/main.exe -- "$hex" > "${hex%.hex}.asm"
+basename=$(basename "$dir")
+
+dune exec src/instruction_resolv/main.exe -- "$dir" > "${dir}/${basename}.asm"

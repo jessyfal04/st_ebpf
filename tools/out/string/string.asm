@@ -1,0 +1,20 @@
+--CODES--
+
+./out/string/code/string_xdp.hex
+instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0)
+instr(ALU(K,MOV), dst=0, src=0, offset=0, imm=2)
+instr(STX(DW,MEM), dst=10, src=0, offset=65504, imm=0)
+instr(JMP(K,CALL), dst=0, src=0, offset=0, imm=6)
+instr(ALU(K,MOV), dst=2, src=0, offset=0, imm=25)
+instr(LD(W,IMM), dst=0, src=0, offset=0, imm=0)
+instr(LD(DW,IMM), dst=1, src=0, offset=0, imm=3)
+instr(STX(DW,MEM), dst=10, src=0, offset=65512, imm=0)
+instr(JMP(K,CALL), dst=0, src=0, offset=0, imm=6)
+instr(ALU(K,MOV), dst=2, src=0, offset=0, imm=3)
+instr(LD(W,IMM), dst=0, src=0, offset=0, imm=0)
+instr(LD(DW,IMM), dst=1, src=0, offset=0, imm=0)
+instr(LDX(DW,MEM), dst=3, src=10, offset=65520, imm=0)
+instr(STX(DW,MEM), dst=10, src=1, offset=65520, imm=0)
+instr(LD(W,IMM), dst=0, src=0, offset=0, imm=0)
+instr(LD(DW,IMM), dst=1, src=0, offset=0, imm=0)
+instr(STX(DW,MEM), dst=10, src=1, offset=65528, imm=0)

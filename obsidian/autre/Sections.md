@@ -230,6 +230,30 @@ OFFSET           TYPE                     VALUE
 0000000000000028 R_BPF_64_64              .rodata
 0000000000000050 R_BPF_64_64              .rodata
 ```
+
+
+Il y a une formule pour les relocation !!
+`(S + A) / 8 - 1` 
+
+(0 + 0)/8 - 1 = -1 car (-1 +1) * 8 = 0
+(0 + 0x70)/8 - 1 = 13 = 0xd car (0xd+1 = 0xe) * 8 = 0x70
+
+```c
+_xdp
+; 	if (odd(x) != 0)
+       3:	61 a1 ec ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x14)
+       4:	85 10 00 00 ff ff ff ff	call -0x1
+		0000000000000020:  R_BPF_64_32	.text
+		
+; 	if (even(x) != 1)
+      10:	61 a1 ec ff 00 00 00 00	w1 = *(u32 *)(r10 - 0x14)
+      11:	85 10 00 00 0d 00 00 00	call 0xd
+		0000000000000058:  R_BPF_64_32	.text
+
+.text
+0000000000000000 <odd>:		
+0000000000000070 <even>:
+```
 ## Symboles
 ```
 0000000000000000 0000000000000004 D _license

@@ -1,0 +1,20 @@
+--CODES--
+
+./out/sumTab/code/sumTab_xdp.hex
+instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0)
+instr(ALU(K,MOV), dst=0, src=0, offset=0, imm=2)
+instr(STX(DW,MEM), dst=10, src=0, offset=65512, imm=0)
+instr(JMP(K,CALL), dst=0, src=0, offset=0, imm=6)
+instr(ALU(K,MOV), dst=2, src=0, offset=0, imm=9)
+instr(LD(W,IMM), dst=0, src=0, offset=0, imm=0)
+instr(LD(DW,IMM), dst=1, src=0, offset=0, imm=0)
+instr(LDX(W,MEM), dst=3, src=10, offset=65524, imm=0)
+instr(STX(W,MEM), dst=10, src=1, offset=65524, imm=0)
+instr(ALU(X,ADD), dst=1, src=2, offset=0, imm=0)
+instr(LDX(W,MEM), dst=2, src=2, offset=8, imm=0)
+instr(ALU(X,ADD), dst=1, src=3, offset=0, imm=0)
+instr(LDX(W,MEM), dst=3, src=2, offset=4, imm=0)
+instr(LDX(W,MEM), dst=1, src=2, offset=0, imm=0)
+instr(LD(W,IMM), dst=0, src=0, offset=0, imm=0)
+instr(LD(DW,IMM), dst=2, src=0, offset=0, imm=0)
+instr(STX(DW,MEM), dst=10, src=1, offset=65528, imm=0)

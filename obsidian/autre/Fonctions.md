@@ -20,3 +20,5 @@ Pattern quand on fait des appel avec adresses
       10:	07 02 00 00 ec ff ff ff	r2 += -0x14
 ```
 
+# Arguments
+Il y a max 5 arguments qui sont préparés dans r1 ~ r5.
