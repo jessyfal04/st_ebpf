@@ -5,21 +5,17 @@
 	- 2 types de CALL :
 		- 0 avec helper (maybe afficher nom de fonction)
 		- 1 avec dans le code
+	- Autres types de "AST"
+		- - Opérations signés et spéciales avec une certaine valeur de registre
+		- https://www.rfc-editor.org/rfc/rfc9669.html#section-4.1-15
+		- Byte Swap ...
+		- src_reg pour 64-bit Immediate Instructions
+		- Atomic Operations
+		- Jump Instruction avec diff src_reg
 
-- Continuer la partie sur les différences avec les autres projets
-- Lire article avec opérations formelles
+- Lire les nouveaux articles
 
 - A quoi sert la variable ctx context ? 'r1'
-- label PC
-- Parsing : 
-	- Opérations signés et spéciales avec une certaine valeur de registre
-		- https://www.rfc-editor.org/rfc/rfc9669.html#section-4.1-15
-	- Byte Swap ...
-	- src_reg pour 64-bit Immediate Instructions
-	- Atomic Operations
-	- Jump Instruction avec diff src_reg
-
-
 # Question
 - S'occuper des types, des maps (BPF_MAP_TYPE_ARRAY / BPF_MAP_TYPE_HASH) avec .BPF car quand je change le type c'est ici que ça change.
 ![[Pasted image 20260603102954.png]]

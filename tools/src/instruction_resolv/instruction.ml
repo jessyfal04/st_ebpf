@@ -37,6 +37,15 @@ type size =
 | B (** byte = 1B *)
 | DW (* double word = 8B *)
 
+type atomic_op = 
+ADD_ATOMIC | OR_ATOMIC | AND_ATOMIC | XOR_ATOMIC (*atomic add / or / and / xor *)
+| XCHG (* atomic exchange *)
+| CMPXCHG (* atomic compare and exchange *)
+
+type atomic_flag =
+| NO_FETCH
+| WITH_FETCH (* modifier: return old value *)
+
 (* The mode modifier *)
 type mode =
 | IMM (* 64-bit immediate instructions *)
@@ -44,11 +53,13 @@ type mode =
 | IND (* legacy BPF packet access (indirect) *)
 | MEM (* regular load and store operations *)
 | MEMSX (* sign-extension load operations *)
-| ATOMIC (* atomic operations *)
+| ATOMIC of atomic_op * atomic_flag (* atomic operations *)
 
 type source =
 | K (* use 32-bit 'imm' value as source operand *)
-| X (* use 'src_reg' register value as source operand *)
+| X (* use 'src' register value as source operand *)
+
+type byte_swap = LE_BS | BE_BS| RESERVED_BS
 
 (* The code field for ALU instructions *)
 type code_alu =
@@ -56,20 +67,27 @@ type code_alu =
 | SUB   (* dst -= src *)
 | MUL   (* dst *= src *)
 | DIV   (* dst = (src != 0) ? (dst / src) : 0 *)
+| SDIV  (* dst = (src != 0) ? (dst s/ src) : 0 *)
 | OR    (* dst |= src *)
 | AND   (* dst &= src *)
 | LSH   (* dst <<= (src & mask) *)
 | RSH   (* dst >>= (src & mask) *)
 | NEG   (* dst = -dst *)
 | MOD   (* dst = (src != 0) ? (dst % src) : dst *)
+| SMOD  (* dst = (src != 0) ? (dst s% src) : dst *)
 | XOR   (* dst ^= src *)
 | MOV   (* dst = src *)
+| MOVSX of int (* dst = (s8,s16,s32)src *)
 | ARSH  (* sign extending shift right *)
-| END   (* byte swap operations *)
+| END   of byte_swap (* byte swap operations *)
+
+type call_from = STATIC_ID | CALL_IMM | BTF_ID
+
+type ja_type = OFFSET_JA | IMM_JA
 
 (* The code field for jump instructions *)
 type code_jmp =
-| JA   (* PC += offset, {JA, K, JMP} | PC += imm, {JA, K, JMP32} only ; src_reg = 0 *)
+| JA of ja_type  (* PC += offset, {JA, K, JMP} | PC += imm, {JA, K, JMP32} only ; src = 0 *)
 | JEQ  (* PC += offset if dst == src *)
 | JGT  (* PC += offset if dst > src, unsigned *)
 | JGE  (* PC += offset if dst >= src, unsigned *)
@@ -77,7 +95,7 @@ type code_jmp =
 | JNE  (* PC += offset if dst != src *)
 | JSGT (* PC += offset if dst > src, signed *)
 | JSGE (* PC += offset if dst >= src, signed *)
-| CALL (* src_reg = 0,1,2 -> call helper function by static ID, call PC += imm, call helper function by BTF ID *)
+| CALL of call_from (* src = 0,1,2 -> call helper function by static ID, call PC += imm, call helper function by BTF ID *)
 | EXIT (* return *)
 | JLT  (* C += offset if dst < src, unsigned *)
 | JLE  (* PC += offset if dst <= src, unsigned *)
@@ -95,14 +113,24 @@ type opcode =
 | JMP32 of source * code_jmp (*32-bit jump operations*)
 | ALU64 of source * code_alu (*64-bit arithmetic operations*)
 
-type dst_reg = int (*destination register number (0-10)*)
-type src_reg = int (*the source register number (0-10), except where otherwise specified (64-bit immediate instructions reuse this field for other purposes)*)
+type wide_type = 
+| INTEGER (* dst = (next_imm << 32) | imm, integer, integer *)
+| MAP_BY_FD (* dst = map_by_fd(imm), map fd, map *)
+| MAP_VAL_FD (* dst = map_val(map_by_fd(imm)) + next_imm, map fd, data adress *)
+| VAR_ADDR (* dst = var_addr(imm), variable id, data address *)
+| CODE_ADDR (* dst = code_addr(imm), integer, code address *)
+| MAP_BY_IDX (* dst = map_by_idx(imm), map index, map *)
+| MAP_VAL_IDX (* dst = map_val(map_by_idx(imm)) + next_imm, map index, data address*)
+
+type dst = int (*destination register number (0-10)*)
+type src = int (*the source register number (0-10), except where otherwise specified (64-bit immediate instructions reuse this field for other purposes)*)
 type offset = int (*signed integer offset used with pointer arithmetic*)
 type imm32 = int32 (*signed integer immediate value*)
 type imm64 = int64
+
 type instr = 
-  | BASIC of opcode * dst_reg * src_reg * offset * imm32
-  | WIDE of opcode * dst_reg * src_reg * offset * imm64
+  | BASIC of opcode * dst * src * offset * imm32
+  | WIDE of opcode * wide_type * dst * src * offset * imm64
 
 type line = int * instr
 
@@ -116,14 +144,30 @@ let size_resolver opcode : size =
   | 3 -> DW
   | _ -> failwith "Invalid opcode_size"
 
-let mode_resolver opcode : mode =
+let atomic_resolver imm : atomic_op =
+  match Int32.to_int imm with
+  | 0x00 -> ADD_ATOMIC
+  | 0x40 -> OR_ATOMIC
+  | 0x50 -> AND_ATOMIC
+  | 0xa0 -> XOR_ATOMIC
+  | 0xe0 -> XCHG
+  | 0xf0 -> CMPXCHG
+  | _ -> failwith "Invalid atomic_resolver"
+
+let atomic_flag_resolver imm : atomic_flag =
+  match Int32.logand imm 0x01l with
+  | 0l -> NO_FETCH
+  | 1l -> WITH_FETCH
+  | _ -> failwith "Invalid atomic_flag_resolver"
+
+let mode_resolver opcode imm: mode =
   match lsb_bits_of_number opcode 5 3 with
   | 0 -> IMM
   | 1 -> ABS
   | 2 -> IND
   | 3 -> MEM
   | 4 -> MEMSX
-  | 5 -> ATOMIC
+  | 5 -> ATOMIC (atomic_resolver imm, atomic_flag_resolver imm)
   | _ -> failwith "Invalid opcode_mode"
 
 (* the source operand location, which unless otherwise specified is one of *)
@@ -133,56 +177,109 @@ let source_resolver opcode : source =
   | 1 -> X
   | _ -> failwith "Invalid opcode_source"
 
+let byte_swap_resolver is_alu64 opcode : byte_swap =
+  let bit1bs = lsb_bits_of_number opcode 3 1 in
+  match (is_alu64, bit1bs) with
+  | false, 0 -> LE_BS
+  | false, 1 -> BE_BS
+  | true, 0 -> RESERVED_BS
+  | _ -> failwith "Invalid byte_swap_resolver"
+
 (* ALU uses 32-bit wide operands while ALU64 uses 64-bit wide operands for otherwise identical operations *)
-let code_alu_resolver opcode : code_alu =
-  match lsb_bits_of_number opcode 4 4 with
-  | 0x0 -> ADD
-  | 0x1 -> SUB
-  | 0x2 -> MUL
-  | 0x3 -> DIV
-  | 0x4 -> OR
-  | 0x5 -> AND
-  | 0x6 -> LSH
-  | 0x7 -> RSH
-  | 0x8 -> NEG
-  | 0x9 -> MOD
-  | 0xa -> XOR
-  | 0xb -> MOV
-  | 0xc -> ARSH
-  | 0xd -> END
+let code_alu_resolver opcode offset imm is_alu64 : code_alu =
+  let source = source_resolver opcode in
+  match (lsb_bits_of_number opcode 4 4, offset) with
+  | 0x0, _ -> ADD
+  | 0x1, _ -> SUB
+  | 0x2, _ -> MUL
+  | 0x3, 0 -> DIV
+  | 0x3, 1 -> SDIV
+  | 0x4, _ -> OR
+  | 0x5, _ -> AND
+  | 0x6, _ -> LSH
+  | 0x7, _ -> RSH
+  | 0x8, _ when source = K -> NEG (*The NEG instruction is only defined when the source bit is clear (K).*)
+  | 0x9, 0 -> MOD
+  | 0x9, 1 -> SMOD
+  | 0xa, _ -> XOR
+  | 0xb, 0 -> MOV
+  | 0xb, s when source = X && List.mem s [8; 16; 32] -> MOVSX(s) (*MOVSX is only defined for register source operands (X)*)
+  | 0xc, _ -> ARSH
+  | 0xd, _ when List.mem (Int32.to_int imm) [16; 32; 64] -> END (byte_swap_resolver is_alu64 opcode)
   | _ -> failwith "Invalid code_alu"
 
 (* The 'code' field encodes the jump operation *)
-let code_jmp_resolver opcode : code_jmp =
-  match lsb_bits_of_number opcode 4 4 with
-  | 0x0 -> JA
-  | 0x1 -> JEQ
-  | 0x2 -> JGT
-  | 0x3 -> JGE
-  | 0x4 -> JSET
-  | 0x5 -> JNE
-  | 0x6 -> JSGT
-  | 0x7 -> JSGE
-  | 0x8 -> CALL
-  | 0x9 -> EXIT
-  | 0xa -> JLT
-  | 0xb -> JLE
-  | 0xc -> JSLT
-  | 0xd -> JSLE
+let code_jmp_resolver opcode src is_jmp32 : code_jmp =
+  let source = source_resolver opcode in
+  match (lsb_bits_of_number opcode 4 4, src) with
+  | 0x0, _ when is_jmp32 = false-> JA (OFFSET_JA)
+  | 0x0, _ when is_jmp32 = true -> JA (IMM_JA)
+  | 0x1, _ -> JEQ
+  | 0x2, _ -> JGT
+  | 0x3, _ -> JGE
+  | 0x4, _ -> JSET
+  | 0x5, _ -> JNE
+  | 0x6, _ -> JSGT
+  | 0x7, _ -> JSGE
+  | 0x8, 0 when source = K && is_jmp32 = false -> CALL (STATIC_ID)
+  | 0x8, 1 when source = K && is_jmp32 = false -> (CALL CALL_IMM)
+  | 0x8, 2 when source = K && is_jmp32 = false -> CALL (BTF_ID)
+  | 0x9, 0 -> EXIT
+  | 0xa, _ -> JLT
+  | 0xb, _ -> JLE
+  | 0xc, _ -> JSLT
+  | 0xd, _ -> JSLE
   | _ -> failwith "Invalid code_jmp"
 
 (* The three least significant bits of the 'opcode' field store the instruction class *)
-let opcode_resolver opcode : opcode =
+let opcode_resolver opcode src offset imm : opcode =
   match lsb_bits_of_number opcode 0 3 with
-  | 0 -> LD (size_resolver opcode, mode_resolver opcode)
-  | 1 -> LDX (size_resolver opcode, mode_resolver opcode)
-  | 2 -> ST (size_resolver opcode, mode_resolver opcode)
-  | 3 -> STX (size_resolver opcode, mode_resolver opcode)
-  | 4 -> ALU (source_resolver opcode, code_alu_resolver opcode)
-  | 5 -> JMP (source_resolver opcode, code_jmp_resolver opcode)
-  | 6 -> JMP32 (source_resolver opcode, code_jmp_resolver opcode)
-  | 7 -> ALU64 (source_resolver opcode, code_alu_resolver opcode)
+  | 0 -> LD (size_resolver opcode, mode_resolver opcode imm)
+  | 1 -> LDX (size_resolver opcode, mode_resolver opcode imm)
+  | 2 -> ST (size_resolver opcode, mode_resolver opcode imm)
+  | 3 -> STX (size_resolver opcode, mode_resolver opcode imm)
+  | 4 -> ALU (source_resolver opcode, code_alu_resolver opcode offset imm false)
+  | 5 -> JMP (source_resolver opcode, code_jmp_resolver opcode src false)
+  | 6 -> JMP32 (source_resolver opcode, code_jmp_resolver opcode src true)
+  | 7 -> ALU64 (source_resolver opcode, code_alu_resolver opcode offset imm true)
   | _ -> failwith "Invalid opcode_resolver"
+
+(* The following table defines a set of {IMM, DW, LD} instructions with opcode subtypes in the 'src_reg' field, using new terms such as "map" defined further below:*)
+let wide_type_resolver src : wide_type = 
+  match src with 
+    | 0x0 -> INTEGER
+    | 0x1 -> MAP_BY_FD
+    | 0x2 -> MAP_VAL_FD
+    | 0x3 -> VAR_ADDR
+    | 0x4 -> CODE_ADDR
+    | 0x5 -> MAP_BY_IDX
+    | 0x6 -> MAP_VAL_IDX
+    | _ -> failwith "Invalid wide_type_resolver"
+
+(* Parse une ligne *)
+let rec parse_line32 line : instr =
+  (* opcode 16 + 8 bits reg : 4 bits dst + 4 bits src *)
+  let opcode = byte_of_line line 0 in
+
+  let reg_byte = byte_of_line line 1 in
+  let dst = lsb_bits_of_number reg_byte 0 4 in
+  let src = lsb_bits_of_number reg_byte 4 4 in
+  (* 16 bits offset *)
+  let offset = parse16 line 2 in
+  (* 32 bits : imm *)
+  let imm = parse32 line 4 in
+
+  let r_opcode = opcode_resolver opcode src offset imm in
+  BASIC (r_opcode, dst, src, offset, imm)
+
+and parse_line64 prev_instr next_line : instr =
+  match prev_instr, parse_line32 next_line with
+  (* imm + reserved : unused, set to zero + next_imm:
+second signed integer immediate value *)
+  | BASIC (LD (DW, IMM), dst, src, off, imm), BASIC (LD (W, IMM), 0, 0, 0, next_imm) ->
+    let wide_type = wide_type_resolver src in
+    WIDE (LD (DW, IMM), wide_type, dst, 0, off, parse64 imm next_imm)
+  | _ -> failwith "parse_line64"
 
 (* {IMM, DW, LD} cas spécial 64-bit Immediate Instructions *)
 let check64imm (instr : instr) : bool =
@@ -190,34 +287,11 @@ let check64imm (instr : instr) : bool =
   | BASIC (LD (DW, IMM), _ , _, _, _) -> true
   | _ -> false
 
-(* Parse une ligne *)
-let rec parse_line line : instr =
-  (* Récupérer le opcode 16 *)
-  let opcode = opcode_resolver (byte_of_line line 0) in
-  
-  (* 8 bits reg : 4 bits dst_reg + 4 bits src_reg *)
-  let reg_byte = byte_of_line line 1 in
-  let dst_reg = lsb_bits_of_number reg_byte 0 4 in
-  let src_reg = lsb_bits_of_number reg_byte 4 4 in
-  (* 16 bits offset *)
-  let offset = parse16 line 2 in
-  (* 32 bits : imm *)
-  let imm = parse32 line 4 in
-  BASIC (opcode, dst_reg, src_reg, offset, imm)
-and parse_line64 prev_instr next_line : instr =
-  match prev_instr, parse_line next_line with
-  (* imm + reserved : unused, set to zero + next_imm:
-second signed integer immediate value *)
-  (* todo table 12 src != 0 *)
-  | BASIC (LD (DW, IMM), dst, 0, off, imm), BASIC (LD (W, IMM), 0, 0, 0, next_imm) ->
-      WIDE (LD (DW, IMM), dst, 0, off, parse64 imm next_imm)
-  | _ -> failwith "parse_line64"
-
 (* Traiter chaque ligne de 8 octects *)
 let rec get_instrs acc text : instr list =
   try
     let line = input_line text in
-    let instr = parse_line line in
+    let instr = parse_line32 line in
 
     (* Verifier si la ligne a besoin d'un 64 bits*)
     let instrChecked64 = 
@@ -233,13 +307,13 @@ let rec get_instrs acc text : instr list =
   with End_of_file ->
     List.rev acc
 
-let rec get_nbLine instrs offset acc : line list =
+let rec get_pcLines instrs offset acc : line list =
   match instrs with
-  | BASIC _ as i :: l -> get_nbLine l (offset+8) ((offset, i) :: acc)
-  | WIDE _ as i :: l -> get_nbLine l (offset+16) ((offset, i) :: acc)
+  | BASIC _ as i :: l -> get_pcLines l (offset+8) ((offset, i) :: acc)
+  | WIDE _ as i :: l -> get_pcLines l (offset+16) ((offset, i) :: acc)
   | [] -> List.rev acc
 
 let parse_lines text =
     let instrs = get_instrs [] text in
-    let lines = get_nbLine instrs 0 [] in
+    let lines = get_pcLines instrs 0 [] in
     lines

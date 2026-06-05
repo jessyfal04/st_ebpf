@@ -15,13 +15,34 @@ let pp_size fmt = function
   | B -> fprintf fmt "B"
   | DW -> fprintf fmt "DW"
 
+let pp_atomic_op fmt = function
+  | ADD_ATOMIC -> fprintf fmt "ADD"
+  | OR_ATOMIC -> fprintf fmt "OR"
+  | AND_ATOMIC -> fprintf fmt "AND"
+  | XOR_ATOMIC -> fprintf fmt "XOR"
+  | XCHG -> fprintf fmt "XCHG"
+  | CMPXCHG -> fprintf fmt "CMPXCHG"
+
+let pp_atomic_flag fmt = function
+  | NO_FETCH -> fprintf fmt "NO_FETCH"
+  | WITH_FETCH -> fprintf fmt "WITH_FETCH"
+
 let pp_mode fmt = function
   | IMM -> fprintf fmt "IMM"
   | ABS -> fprintf fmt "ABS"
   | IND -> fprintf fmt "IND"
   | MEM -> fprintf fmt "MEM"
   | MEMSX -> fprintf fmt "MEMSX"
-  | ATOMIC -> fprintf fmt "ATOMIC"
+  | ATOMIC (op, flag) -> fprintf fmt "ATOMIC(%a,%a)" pp_atomic_op op pp_atomic_flag flag
+
+let pp_byte_swap fmt = function
+  | LE_BS -> fprintf fmt "LE"
+  | BE_BS -> fprintf fmt "BE"
+  | RESERVED_BS -> fprintf fmt "RESERVED"
+
+let pp_ja_type fmt = function
+  | OFFSET_JA -> fprintf fmt "OFFSET_JA"
+  | IMM_JA -> fprintf fmt "IMM_JA"
 
 let pp_source fmt = function
   | K -> fprintf fmt "K"
@@ -32,19 +53,27 @@ let pp_code_alu fmt = function
   | SUB -> fprintf fmt "SUB"
   | MUL -> fprintf fmt "MUL"
   | DIV -> fprintf fmt "DIV"
+  | SDIV -> fprintf fmt "SDIV"
   | OR -> fprintf fmt "OR"
   | AND -> fprintf fmt "AND"
   | LSH -> fprintf fmt "LSH"
   | RSH -> fprintf fmt "RSH"
   | NEG -> fprintf fmt "NEG"
   | MOD -> fprintf fmt "MOD"
+  | SMOD -> fprintf fmt "SMOD"
   | XOR -> fprintf fmt "XOR"
   | MOV -> fprintf fmt "MOV"
+  | MOVSX n -> fprintf fmt "MOVSX(%d)" n
   | ARSH -> fprintf fmt "ARSH"
-  | END -> fprintf fmt "END"
+  | END bs -> fprintf fmt "END(%a)" pp_byte_swap bs
 
-let pp_code_jmp fmt = function
-  | JA -> fprintf fmt "JA"
+let pp_call_from fmt = function
+  | STATIC_ID -> fprintf fmt "STATIC_ID"
+  | CALL_IMM -> fprintf fmt "CALL_IMM"
+  | BTF_ID -> fprintf fmt "BTF_ID"
+
+let pp_code_jmp fmt (j:code_jmp) = match j with
+  | JA t -> fprintf fmt "JA(%a)" pp_ja_type t
   | JEQ -> fprintf fmt "JEQ"
   | JGT -> fprintf fmt "JGT"
   | JGE -> fprintf fmt "JGE"
@@ -52,12 +81,21 @@ let pp_code_jmp fmt = function
   | JNE -> fprintf fmt "JNE"
   | JSGT -> fprintf fmt "JSGT"
   | JSGE -> fprintf fmt "JSGE"
-  | CALL -> fprintf fmt "CALL"
+  | CALL call_from -> fprintf fmt "CALL(%a)" pp_call_from call_from
   | EXIT -> fprintf fmt "EXIT"
   | JLT -> fprintf fmt "JLT"
   | JLE -> fprintf fmt "JLE"
   | JSLT -> fprintf fmt "JSLT"
   | JSLE -> fprintf fmt "JSLE"
+
+let pp_wide_type fmt = function
+  | INTEGER -> fprintf fmt "INTEGER"
+  | MAP_BY_FD -> fprintf fmt "MAP_BY_FD"
+  | MAP_VAL_FD -> fprintf fmt "MAP_VAL_FD"
+  | VAR_ADDR -> fprintf fmt "VAR_ADDR"
+  | CODE_ADDR -> fprintf fmt "CODE_ADDR"
+  | MAP_BY_IDX -> fprintf fmt "MAP_BY_IDX"
+  | MAP_VAL_IDX -> fprintf fmt "MAP_VAL_IDX"
 
 let pp_opcode fmt = function
   | LD (s, m) -> fprintf fmt "LD(%a,%a)" pp_size s pp_mode m
@@ -71,7 +109,7 @@ let pp_opcode fmt = function
 
 let pp_instr fmt = function
   | BASIC (opcode, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr(%a, dst=%d, src=%d, offset=%d, imm=%ld)" pp_opcode opcode dst_reg src_reg offset imm
-  | WIDE (opcode, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr64(%a, dst=%d, src=%d, offset=%d, imm=%Ldll)" pp_opcode opcode dst_reg src_reg offset imm
+  | WIDE (opcode, wide_type, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr64(%a, %a, dst=%d, src=%d, offset=%d, imm=%Ldll)" pp_opcode opcode pp_wide_type wide_type dst_reg src_reg offset imm
 
 let rec pp_line fmt (n, instr) =
   fprintf fmt "%d : %a" n  pp_instr instr
