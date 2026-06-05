@@ -1,23 +1,13 @@
-# Opérations
 
-- Résourdre  à l'aide des TSV ~ 
-	- Reloc R_BPF_64_64 / 32 via reloc -> symbSec -> section -> formule
-	- 2 types de CALL :
-		- 0 avec helper (maybe afficher nom de fonction)
-		- 1 avec dans le code
-	- Autres types de "AST"
-		- - Opérations signés et spéciales avec une certaine valeur de registre
-		- https://www.rfc-editor.org/rfc/rfc9669.html#section-4.1-15
-		- Byte Swap ...
-		- src_reg pour 64-bit Immediate Instructions
-		- Atomic Operations
-		- Jump Instruction avec diff src_reg
+- Reloc R_BPF_64_64 / 32 via reloc -> symbSec -> section -> formule dans info
+- Print en mode beau
+- Faire une passe finale pour les rejets ? 
 
-- Lire les nouveaux articles
-
-- A quoi sert la variable ctx context ? 'r1'
+- Séparation des .text et calcul des goto ! 
+- Lire les nouveaux articles & maybe un peu de thèse ce WE
 # Question
-- S'occuper des types, des maps (BPF_MAP_TYPE_ARRAY / BPF_MAP_TYPE_HASH) avec .BPF car quand je change le type c'est ici que ça change.
+- A quoi sert la variable ctx context ? 'r1'
+- ![[Pasted image 20260603102954.png]] S'occuper des types, des maps (BPF_MAP_TYPE_ARRAY / BPF_MAP_TYPE_HASH) avec .BPF car quand je change le type c'est ici que ça change.
 ![[Pasted image 20260603102954.png]]
 	et des tableaux ou juste considérer que ce sont des cases avec des valeurs ?
 
@@ -26,14 +16,9 @@
 0000000000000020 32 4 array_of_maps
 0000000000000000 32 4 inner_map
 ```
-
-- Plus tard, il y a quelque chose de spécial à faire / à détecter pour :
-	- les pointeurs des maps?
-	- les divisions par zéro ? 
-	- les programmes privilégiés ? , c'est mentionné dans l'article "Simple and Precise Static Analysis"
 # Next
 - Lire thèse qui explique MOPSA
 - Créateur d'AST
 - Voir ce qu'on peut réutiliser de C
 - Model. noyau linux pour intéractions avec lui
-- Quel warning ; quel alarmes pour ebpf ?
+- Quel warning ; quel alarmes pour ebpf ? (div 0 et tt, instruction spéciales)

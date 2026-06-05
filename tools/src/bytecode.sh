@@ -10,13 +10,13 @@ obj=$1
 basename=$(basename "$obj" .o)
 
 # Sous-dossiers résurssivement
-for dir in sections symb code reloc data btf; do
+for dir in code reloc data; do
     mkdir -p "out/$basename/$dir"
 done
 
 # Listage des SECTION présentes
-readelf -S $obj --wide > "out/$basename/sections/_sections_readelf.txt"
-llvm-objdump -h "$obj" > "out/$basename/sections/_sections_llvm-objdump.txt"
+# readelf -S $obj --wide > "out/$basename/sections/_sections_readelf.txt"
+# llvm-objdump -h "$obj" > "out/$basename/sections/_sections_llvm-objdump.txt"
 {
     printf "IDX\tNAME\tSIZE\tVMA\tTYPE\n"
     llvm-objdump -h "$obj" |
@@ -25,7 +25,7 @@ llvm-objdump -h "$obj" > "out/$basename/sections/_sections_llvm-objdump.txt"
             print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5
         }
     '
-} > "out/$basename/sections/${basename}_sections.tsv"
+} > "out/$basename/sections.tsv"
 
 # Extrait la section de CODE (type TEXT) et non vides, et de leurs sections si non vide
 llvm-objdump -h "$obj" |
@@ -74,11 +74,11 @@ while read -r section; do
 done
 
 # Extraction des SYMBOLES
-{
-    printf "VALUE\tSIZE\tTYPE\tNAME\n"
-    llvm-nm -S --defined-only "$obj" | awk 'NF >= 4 { print $1 "\t" $2 "\t" $3 "\t" $4 }'
-} > "out/$basename/symb/${basename}_symb.tsv"
-echo "Symboles extraits."
+# {
+#     printf "VALUE\tSIZE\tTYPE\tNAME\n"
+#     llvm-nm -S --defined-only "$obj" | awk 'NF >= 4 { print $1 "\t" $2 "\t" $3 "\t" $4 }'
+# } > "out/$basename/symb/${basename}_symb.tsv"
+# echo "Symboles extraits."
 
 {
     printf "VALUE\tSIZE\tNDX\tNAME\n"
@@ -88,10 +88,10 @@ echo "Symboles extraits."
             print $2 "\t" $3 "\t" $7 "\t" $8
         }
     '
-} > "out/$basename/symb/${basename}_symbSec.tsv"
+} > "out/$basename/symb.tsv"
 echo "Symboles avec section extraits."
 
 # Extraction des types (.BTF)
-bpftool btf dump file $obj > "out/$basename/btf/${basename}_btf.txt"
+bpftool btf dump file $obj > "out/$basename/btf.txt"
 
 

@@ -1,12 +1,11 @@
 open Format
 open Instruction
+open Info
 
+(* Instructions *)
 let sep_cma fmt () = fprintf fmt ", "
 let sep_brk fmt () = fprintf fmt "\n"
-
-
 let pp_lst_cma p = pp_print_list ~pp_sep:sep_cma p
-
 let pp_lst_brk p = pp_print_list ~pp_sep:sep_brk p
 
 let pp_size fmt = function
@@ -111,9 +110,17 @@ let pp_instr fmt = function
   | BASIC (opcode, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr(%a, dst=%d, src=%d, offset=%d, imm=%ld)" pp_opcode opcode dst_reg src_reg offset imm
   | WIDE (opcode, wide_type, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr64(%a, %a, dst=%d, src=%d, offset=%d, imm=%Ldll)" pp_opcode opcode pp_wide_type wide_type dst_reg src_reg offset imm
 
-let rec pp_line fmt (n, instr) =
+let pp_line fmt (n, instr) =
   fprintf fmt "%d : %a" n  pp_instr instr
-and pp_lines fmt ins = pp_lst_brk pp_line fmt ins
+
+let pp_info fmt = function
+  | Some (BPF_FUNC s) -> fprintf fmt "info(%s)" s
+  | None -> fprintf fmt "¤"
+
+let pp_lineInfo fmt (line, info) =
+  fprintf fmt "%a ~ %a" pp_line line pp_info info
+
+let pp_lineInfos fmt li = pp_lst_brk pp_lineInfo fmt li
 
 let pp_res res =
-  printf "%a@." pp_lines res
+  printf "%a@." pp_lineInfos res

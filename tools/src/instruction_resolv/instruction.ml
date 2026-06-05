@@ -122,19 +122,20 @@ type wide_type =
 | MAP_BY_IDX (* dst = map_by_idx(imm), map index, map *)
 | MAP_VAL_IDX (* dst = map_val(map_by_idx(imm)) + next_imm, map index, data address*)
 
-type dst = int (*destination register number (0-10)*)
-type src = int (*the source register number (0-10), except where otherwise specified (64-bit immediate instructions reuse this field for other purposes)*)
-type offset = int (*signed integer offset used with pointer arithmetic*)
 type imm32 = int32 (*signed integer immediate value*)
 type imm64 = int64
 
 type instr = 
-  | BASIC of opcode * dst * src * offset * imm32
-  | WIDE of opcode * wide_type * dst * src * offset * imm64
+  | BASIC of opcode * int * int * int * imm32
+  | WIDE of opcode * wide_type * int * int * int * imm64
 
 type line = int * instr
 
 (* REVOLVERS *)
+let register_resolver reg =
+  if 0 <= reg && reg <= 10 then reg
+  else failwith "Invalid register"
+
 (* For load and store instructions (LD, LDX, ST, and STX), the 8-bit opcode field is divided as follows *)
 let size_resolver opcode : size =
   match lsb_bits_of_number opcode 3 2 with
@@ -145,7 +146,7 @@ let size_resolver opcode : size =
   | _ -> failwith "Invalid opcode_size"
 
 let atomic_resolver imm : atomic_op =
-  match Int32.to_int imm with
+  match Int32.to_int (Int32.logand imm 0xfel) with
   | 0x00 -> ADD_ATOMIC
   | 0x40 -> OR_ATOMIC
   | 0x50 -> AND_ATOMIC
@@ -167,7 +168,7 @@ let mode_resolver opcode imm: mode =
   | 2 -> IND
   | 3 -> MEM
   | 4 -> MEMSX
-  | 5 -> ATOMIC (atomic_resolver imm, atomic_flag_resolver imm)
+  | 6 -> ATOMIC (atomic_resolver imm, atomic_flag_resolver imm)
   | _ -> failwith "Invalid opcode_mode"
 
 (* the source operand location, which unless otherwise specified is one of *)
@@ -188,24 +189,25 @@ let byte_swap_resolver is_alu64 opcode : byte_swap =
 (* ALU uses 32-bit wide operands while ALU64 uses 64-bit wide operands for otherwise identical operations *)
 let code_alu_resolver opcode offset imm is_alu64 : code_alu =
   let source = source_resolver opcode in
+  let movsx_offsets = if is_alu64 then [8; 16; 32] else [8; 16] in
   match (lsb_bits_of_number opcode 4 4, offset) with
-  | 0x0, _ -> ADD
-  | 0x1, _ -> SUB
-  | 0x2, _ -> MUL
+  | 0x0, 0 -> ADD
+  | 0x1, 0 -> SUB
+  | 0x2, 0 -> MUL
   | 0x3, 0 -> DIV
   | 0x3, 1 -> SDIV
-  | 0x4, _ -> OR
-  | 0x5, _ -> AND
-  | 0x6, _ -> LSH
-  | 0x7, _ -> RSH
-  | 0x8, _ when source = K -> NEG (*The NEG instruction is only defined when the source bit is clear (K).*)
+  | 0x4, 0 -> OR
+  | 0x5, 0 -> AND
+  | 0x6, 0 -> LSH
+  | 0x7, 0 -> RSH
+  | 0x8, 0 when source = K -> NEG (*The NEG instruction is only defined when the source bit is clear (K).*)
   | 0x9, 0 -> MOD
   | 0x9, 1 -> SMOD
-  | 0xa, _ -> XOR
+  | 0xa, 0 -> XOR
   | 0xb, 0 -> MOV
-  | 0xb, s when source = X && List.mem s [8; 16; 32] -> MOVSX(s) (*MOVSX is only defined for register source operands (X)*)
-  | 0xc, _ -> ARSH
-  | 0xd, _ when List.mem (Int32.to_int imm) [16; 32; 64] -> END (byte_swap_resolver is_alu64 opcode)
+  | 0xb, s when source = X && List.mem s movsx_offsets -> MOVSX(s) (* MOVSX is only defined for register source operands (X). *)
+  | 0xc, 0 -> ARSH
+  | 0xd, 0 when List.mem (Int32.to_int imm) [16; 32; 64] -> END (byte_swap_resolver is_alu64 opcode)
   | _ -> failwith "Invalid code_alu"
 
 (* The 'code' field encodes the jump operation *)
@@ -231,13 +233,24 @@ let code_jmp_resolver opcode src is_jmp32 : code_jmp =
   | 0xd, _ -> JSLE
   | _ -> failwith "Invalid code_jmp"
 
+let opcode_resolver_checked opcode imm : opcode =
+  let classCode = lsb_bits_of_number opcode 0 3 in
+  let size = size_resolver opcode in
+  let mode = mode_resolver opcode imm in
+
+match classCode, mode, size with
+  | 1, m, s when not (m = MEMSX && not (s = B || s = H || s = W)) -> 
+    LDX (size, mode)
+  | 3, m, s when not ((match m with ATOMIC _ -> true | _ -> false) && not (s = W || s = DW)) -> 
+    STX (size, mode)
+  | _ -> failwith "Invalid opcode_resolver_ldst"
+
 (* The three least significant bits of the 'opcode' field store the instruction class *)
 let opcode_resolver opcode src offset imm : opcode =
   match lsb_bits_of_number opcode 0 3 with
   | 0 -> LD (size_resolver opcode, mode_resolver opcode imm)
-  | 1 -> LDX (size_resolver opcode, mode_resolver opcode imm)
   | 2 -> ST (size_resolver opcode, mode_resolver opcode imm)
-  | 3 -> STX (size_resolver opcode, mode_resolver opcode imm)
+  |1|3 -> opcode_resolver_checked opcode imm
   | 4 -> ALU (source_resolver opcode, code_alu_resolver opcode offset imm false)
   | 5 -> JMP (source_resolver opcode, code_jmp_resolver opcode src false)
   | 6 -> JMP32 (source_resolver opcode, code_jmp_resolver opcode src true)
@@ -262,8 +275,8 @@ let rec parse_line32 line : instr =
   let opcode = byte_of_line line 0 in
 
   let reg_byte = byte_of_line line 1 in
-  let dst = lsb_bits_of_number reg_byte 0 4 in
-  let src = lsb_bits_of_number reg_byte 4 4 in
+  let dst = register_resolver (lsb_bits_of_number reg_byte 0 4) in
+  let src = register_resolver (lsb_bits_of_number reg_byte 4 4) in
   (* 16 bits offset *)
   let offset = parse16 line 2 in
   (* 32 bits : imm *)
@@ -274,8 +287,7 @@ let rec parse_line32 line : instr =
 
 and parse_line64 prev_instr next_line : instr =
   match prev_instr, parse_line32 next_line with
-  (* imm + reserved : unused, set to zero + next_imm:
-second signed integer immediate value *)
+  (* imm + reserved : unused, set to zero + next_imm: second signed integer immediate value *)
   | BASIC (LD (DW, IMM), dst, src, off, imm), BASIC (LD (W, IMM), 0, 0, 0, next_imm) ->
     let wide_type = wide_type_resolver src in
     WIDE (LD (DW, IMM), wide_type, dst, 0, off, parse64 imm next_imm)
@@ -296,7 +308,11 @@ let rec get_instrs acc text : instr list =
     (* Verifier si la ligne a besoin d'un 64 bits*)
     let instrChecked64 = 
       if check64imm instr then
-        let line64 = input_line text in
+        let line64 =
+          try input_line text
+          with End_of_file -> 
+            failwith "Missing line64"
+        in
         parse_line64 instr line64
       else
         instr
