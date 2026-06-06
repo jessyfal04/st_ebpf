@@ -1,6 +1,6 @@
---CODES--
+--FONCTIONS--
 
-xdp
+xdp_demo [bind=GLOBAL, entry=true]
 0 : instr(STX(DW,MEM), dst=10, src=1, offset=-8, imm=0) ~ ¤
 8 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.rodata.str1.1,0)
 24 : instr(STX(DW,MEM), dst=10, src=1, offset=-16, imm=0) ~ ¤

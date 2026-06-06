@@ -1,5 +1,6 @@
 open Instruction
 open Info
+open Fonctions
 open Table
 
 type text = { code : line list; reloc : reloc_table option }
@@ -44,7 +45,7 @@ let () =
   let symb_table = auto_in_file (dir ^ "/symb.tsv") load_symbols in
   let section_table = auto_in_file (dir ^ "/sections.tsv") load_sections in
 
-  let annotated_texts =
+  let texts_infos =
     List.map
       (fun (filename, text) ->
         let ctx =
@@ -59,10 +60,15 @@ let () =
       texts
   in
 
+  let texts_fonctions =
+    extract_functions texts_infos
+      { symbols = symb_table; sections = section_table }
+  in
+
   (* Affichage ! *)
-  print_endline "--CODES--";
+  print_endline "--FONCTIONS--";
   List.iter
-    (fun (filename, text) ->
-      print_endline ("\n" ^ filename);
-      Pp.pp_res text)
-    annotated_texts
+    (fun fonction ->
+      print_endline "";
+      Format.printf "%a@." Pp.pp_fonction fonction)
+    texts_fonctions

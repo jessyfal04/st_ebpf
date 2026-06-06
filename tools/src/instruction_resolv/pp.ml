@@ -1,6 +1,7 @@
 open Format
 open Instruction
 open Info
+open Fonctions
 open Table
 
 (* Instructions *)
@@ -130,8 +131,9 @@ let pp_info fmt = function
       fprintf fmt "load_dest(%s,%Ld)" target value
   | None -> fprintf fmt "¤"
 
-let pp_lineInfo fmt (line, info) =
+let rec pp_lineInfo fmt (line, info) =
   fprintf fmt "%a ~ %a" pp_line line pp_info info
+and pp_lineInfos fmt li = pp_lst_brk pp_lineInfo fmt li
 
-let pp_lineInfos fmt li = pp_lst_brk pp_lineInfo fmt li
-let pp_res res = printf "%a@." pp_lineInfos res
+let pp_fonction fmt (fonction : fonction) =
+  fprintf fmt "%s [bind=%s, entry=%b]@.%a" fonction.name fonction.bind fonction.is_entry pp_lineInfos fonction.code

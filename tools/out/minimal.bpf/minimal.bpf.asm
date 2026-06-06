@@ -1,6 +1,6 @@
---CODES--
+--FONCTIONS--
 
-tp_syscalls_sys_enter_write
+handle_tp [bind=GLOBAL, entry=true]
 0 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=14) ~ call_bpf(get_current_pid_tgid)
 8 : instr(ALU64(K,RSH), dst=0, src=0, offset=0, imm=32) ~ ¤
 16 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.bss,0)

@@ -242,13 +242,15 @@ let section_idx_of_symbol symbol =
   | SECTION_NDX idx -> idx
   | OTHER_NDX _ -> failwith "Invalid section_idx_of_symbol"
 
-let has_func_at_offset ctx section_idx offset =
+let func_at_offset ctx section_idx offset =
   Hashtbl.to_seq_values ctx.symbols
-  |> Seq.exists (fun (symbol : symbol) ->
+  |> Seq.find_map (fun (symbol : symbol) ->
          match symbol.ndx with
-         | SECTION_NDX idx ->
-             idx = section_idx && symbol.typ = "FUNC" && symbol.value = offset
-         | OTHER_NDX _ -> false)
+         | SECTION_NDX idx
+           when idx = section_idx && symbol.typ = "FUNC"
+                && symbol.value = offset ->
+             Some symbol
+         | _ -> None)
 
 let resolve_call_bpf_func imm =
   let id = Int32.to_int imm in
@@ -260,16 +262,17 @@ let resolve_call_bpf_func imm =
 let resolve_call_reloc ctx reloc imm =
   if reloc.reloc_typ = R_BPF_64_32 then
     (* formula : target_offset = (imm + 1) * 8 *)
+    let target_offset = Int64.mul (Int64.add (Int64.of_int32 imm) 1L) 8L in
     match Hashtbl.find_opt ctx.symbols reloc.value with
-    | Some symbol when symbol.typ = "FUNC"->
-        let target_offset = Int64.mul (Int64.add (Int64.of_int32 imm) 1L) 8L in
-        Some (CALL_DEST (symbol.name, target_offset))
     | Some symbol ->
-        let relative_offset = Int64.add (Int64.mul (Int64.add (Int64.of_int32 imm) 1L) 8L) symbol.value in
-        let section_idx = section_idx_of_symbol symbol in
-        if has_func_at_offset ctx section_idx relative_offset then
-          Some (CALL_DEST (section_name_of_idx ctx section_idx, relative_offset))
-        else failwith "Invalid resolve_call_reloc (no FUNC found)"
+        if symbol.typ = "FUNC" then
+          Some (CALL_DEST (symbol.name, target_offset))
+        else
+          let section_idx = section_idx_of_symbol symbol in
+          (match func_at_offset ctx section_idx target_offset with
+          | Some func ->
+              Some (CALL_DEST (func.name, Int64.sub target_offset func.value))
+          | None -> failwith "Invalid resolve_call_reloc (no FUNC found)")
     | None -> failwith "Invalid resolve_call_reloc (symbol)"
   else failwith "Invalid resolve_call_reloc (reloc_typ)"
 
