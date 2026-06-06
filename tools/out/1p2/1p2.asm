@@ -1,6 +1,6 @@
 --CODES--
 
-1p2_xdp
+xdp
 0 : instr(STX(DW,MEM), dst=10, src=1, offset=-8, imm=0) ~ ¤
 8 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=1) ~ ¤
 16 : instr(STX(W,MEM), dst=10, src=1, offset=-12, imm=0) ~ ¤

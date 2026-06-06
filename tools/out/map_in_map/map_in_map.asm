@@ -1,13 +1,13 @@
 --CODES--
 
-map_in_map_.text
+.text
 0 : instr(STX(DW,MEM), dst=10, src=1, offset=-16, imm=0) ~ ¤
 8 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=1) ~ ¤
 16 : instr(STX(W,MEM), dst=10, src=1, offset=-20, imm=0) ~ ¤
-24 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ ¤
+24 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.maps,32)
 40 : instr(ALU64(X,MOV), dst=2, src=10, offset=0, imm=0) ~ ¤
 48 : instr(ALU64(K,ADD), dst=2, src=0, offset=0, imm=-20) ~ ¤
-56 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ info(map_lookup_elem)
+56 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ call_bpf(map_lookup_elem)
 64 : instr(STX(DW,MEM), dst=10, src=0, offset=-32, imm=0) ~ ¤
 72 : instr(LDX(DW,MEM), dst=1, src=10, offset=-32, imm=0) ~ ¤
 80 : instr(JMP(K,JEQ), dst=1, src=0, offset=23, imm=0) ~ ¤
@@ -17,7 +17,7 @@ map_in_map_.text
 112 : instr(LDX(DW,MEM), dst=1, src=10, offset=-32, imm=0) ~ ¤
 120 : instr(ALU64(X,MOV), dst=2, src=10, offset=0, imm=0) ~ ¤
 128 : instr(ALU64(K,ADD), dst=2, src=0, offset=0, imm=-36) ~ ¤
-136 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ info(map_lookup_elem)
+136 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ call_bpf(map_lookup_elem)
 144 : instr(STX(DW,MEM), dst=10, src=0, offset=-48, imm=0) ~ ¤
 152 : instr(LDX(DW,MEM), dst=1, src=10, offset=-48, imm=0) ~ ¤
 160 : instr(JMP(K,JEQ), dst=1, src=0, offset=4, imm=0) ~ ¤
@@ -25,10 +25,10 @@ map_in_map_.text
 176 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=0) ~ ¤
 184 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
 192 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=12, imm=0) ~ ¤
-200 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ ¤
+200 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.maps,0)
 216 : instr(ALU64(X,MOV), dst=2, src=10, offset=0, imm=0) ~ ¤
 224 : instr(ALU64(K,ADD), dst=2, src=0, offset=0, imm=-36) ~ ¤
-232 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ info(map_lookup_elem)
+232 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ call_bpf(map_lookup_elem)
 240 : instr(STX(DW,MEM), dst=10, src=0, offset=-48, imm=0) ~ ¤
 248 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=0) ~ ¤
 256 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤

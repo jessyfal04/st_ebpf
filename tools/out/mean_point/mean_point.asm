@@ -1,12 +1,12 @@
 --CODES--
 
-mean_point_xdp
+xdp
 0 : instr(STX(DW,MEM), dst=10, src=1, offset=-8, imm=0) ~ ¤
 8 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=-20) ~ ¤
 16 : instr(STX(W,MEM), dst=10, src=1, offset=-16, imm=0) ~ ¤
 24 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=50) ~ ¤
 32 : instr(STX(W,MEM), dst=10, src=1, offset=-12, imm=0) ~ ¤
-40 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ ¤
+40 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.data,0)
 56 : instr(LDX(W,MEM), dst=2, src=1, offset=0, imm=0) ~ ¤
 64 : instr(LDX(W,MEM), dst=3, src=10, offset=-16, imm=0) ~ ¤
 72 : instr(ALU(X,ADD), dst=2, src=3, offset=0, imm=0) ~ ¤
@@ -25,9 +25,9 @@ mean_point_xdp
 176 : instr(STX(W,MEM), dst=10, src=1, offset=-24, imm=0) ~ ¤
 184 : instr(LDX(W,MEM), dst=3, src=10, offset=-20, imm=0) ~ ¤
 192 : instr(LDX(W,MEM), dst=4, src=10, offset=-24, imm=0) ~ ¤
-200 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ ¤
+200 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.rodata,0)
 216 : instr(ALU(K,MOV), dst=2, src=0, offset=0, imm=18) ~ ¤
-224 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=6) ~ info(trace_printk)
+224 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=6) ~ call_bpf(trace_printk)
 232 : instr(STX(DW,MEM), dst=10, src=0, offset=-32, imm=0) ~ ¤
 240 : instr(ALU(K,MOV), dst=0, src=0, offset=0, imm=2) ~ ¤
 248 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ ¤

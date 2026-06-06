@@ -18,11 +18,11 @@ done
 # readelf -S $obj --wide > "out/$basename/sections/_sections_readelf.txt"
 # llvm-objdump -h "$obj" > "out/$basename/sections/_sections_llvm-objdump.txt"
 {
-    printf "IDX\tNAME\tSIZE\tVMA\tTYPE\n"
+    printf "IDX\tNAME\tSIZE\tTYPE\n"
     llvm-objdump -h "$obj" |
     awk '
         /^[[:space:]]*[0-9]+[[:space:]]+/ {
-            print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5
+            print $1 "\t" $2 "\t" $3 "\t" $5
         }
     '
 } > "out/$basename/sections.tsv"
@@ -33,7 +33,7 @@ awk '$5 == "TEXT" && $3 != "00000000" { print $2 }' |
 
 while read -r section; do
     safe_section=${section//\//_}
-    name="${basename}_${safe_section}"
+    name="${safe_section}"
 
     llvm-objcopy --dump-section "$section=out/$basename/code/$name.bin" "$obj" /dev/null #binaire
     od --address-radix n --format x1 --output-duplicates --width 8 "out/$basename/code/$name.bin" | tr -d ' ' > "out/$basename/code/$name.hex" #hexadecimal
@@ -46,7 +46,7 @@ while read -r section; do
     llvm-objdump -h "$obj" |
     awk -v rel="$rel_section" '$2 == rel && $3 != "00000000" { print $2 }' |
     while read -r rel_section; do
-        name_reloc="${basename}_${safe_section}_reloc"
+        name_reloc="${safe_section}_reloc"
 
         llvm-objdump -r --section=$rel_section "$obj" |
         awk '
@@ -81,11 +81,11 @@ done
 # echo "Symboles extraits."
 
 {
-    printf "VALUE\tSIZE\tNDX\tNAME\n"
+    printf "VALUE\tSIZE\tTYPE\tBIND\tNDX\tNAME\n"
     llvm-readelf -s --wide "$obj" |
     awk '
         /^[[:space:]]*[0-9]+:/ {
-            print $2 "\t" $3 "\t" $7 "\t" $8
+            print $2 "\t" $3 "\t" $4 "\t" $5 "\t" $7 "\t" $8
         }
     '
 } > "out/$basename/symb.tsv"
@@ -93,5 +93,3 @@ echo "Symboles avec section extraits."
 
 # Extraction des types (.BTF)
 bpftool btf dump file $obj > "out/$basename/btf.txt"
-
-

@@ -1,6 +1,7 @@
 open Format
 open Instruction
 open Info
+open Table
 
 (* Instructions *)
 let sep_cma fmt () = fprintf fmt ", "
@@ -32,7 +33,8 @@ let pp_mode fmt = function
   | IND -> fprintf fmt "IND"
   | MEM -> fprintf fmt "MEM"
   | MEMSX -> fprintf fmt "MEMSX"
-  | ATOMIC (op, flag) -> fprintf fmt "ATOMIC(%a,%a)" pp_atomic_op op pp_atomic_flag flag
+  | ATOMIC (op, flag) ->
+      fprintf fmt "ATOMIC(%a,%a)" pp_atomic_op op pp_atomic_flag flag
 
 let pp_byte_swap fmt = function
   | LE_BS -> fprintf fmt "LE"
@@ -43,9 +45,7 @@ let pp_ja_type fmt = function
   | OFFSET_JA -> fprintf fmt "OFFSET_JA"
   | IMM_JA -> fprintf fmt "IMM_JA"
 
-let pp_source fmt = function
-  | K -> fprintf fmt "K"
-  | X -> fprintf fmt "X"
+let pp_source fmt = function K -> fprintf fmt "K" | X -> fprintf fmt "X"
 
 let pp_code_alu fmt = function
   | ADD -> fprintf fmt "ADD"
@@ -71,7 +71,13 @@ let pp_call_from fmt = function
   | CALL_IMM -> fprintf fmt "CALL_IMM"
   | BTF_ID -> fprintf fmt "BTF_ID"
 
-let pp_code_jmp fmt (j:code_jmp) = match j with
+let pp_reloc_type fmt = function
+  | R_BPF_64_64 -> fprintf fmt "R_BPF_64_64"
+  | R_BPF_64_32 -> fprintf fmt "R_BPF_64_32"
+  | OTHER_RELOC s -> fprintf fmt "%s" s
+
+let pp_code_jmp fmt (j : code_jmp) =
+  match j with
   | JA t -> fprintf fmt "JA(%a)" pp_ja_type t
   | JEQ -> fprintf fmt "JEQ"
   | JGT -> fprintf fmt "JGT"
@@ -107,20 +113,25 @@ let pp_opcode fmt = function
   | ALU64 (src, op) -> fprintf fmt "ALU64(%a,%a)" pp_source src pp_code_alu op
 
 let pp_instr fmt = function
-  | BASIC (opcode, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr(%a, dst=%d, src=%d, offset=%d, imm=%ld)" pp_opcode opcode dst_reg src_reg offset imm
-  | WIDE (opcode, wide_type, dst_reg, src_reg, offset, imm) -> fprintf fmt "instr64(%a, %a, dst=%d, src=%d, offset=%d, imm=%Ldll)" pp_opcode opcode pp_wide_type wide_type dst_reg src_reg offset imm
+  | BASIC (opcode, dst_reg, src_reg, offset, imm) ->
+      fprintf fmt "instr(%a, dst=%d, src=%d, offset=%d, imm=%ld)" pp_opcode
+        opcode dst_reg src_reg offset imm
+  | WIDE (opcode, wide_type, dst_reg, src_reg, offset, imm) ->
+      fprintf fmt "instr64(%a, %a, dst=%d, src=%d, offset=%d, imm=%Ldll)"
+        pp_opcode opcode pp_wide_type wide_type dst_reg src_reg offset imm
 
-let pp_line fmt (n, instr) =
-  fprintf fmt "%d : %a" n  pp_instr instr
+let pp_line fmt (n, instr) = fprintf fmt "%d : %a" n pp_instr instr
 
 let pp_info fmt = function
-  | Some (BPF_FUNC s) -> fprintf fmt "info(%s)" s
+  | Some (BPF_FUNC s) -> fprintf fmt "call_bpf(%s)" s
+  | Some (CALL_DEST (target, value)) ->
+      fprintf fmt "call_dest(%s,%Ld)" target value
+  | Some (LOAD_DEST (target, value)) ->
+      fprintf fmt "load_dest(%s,%Ld)" target value
   | None -> fprintf fmt "¤"
 
 let pp_lineInfo fmt (line, info) =
   fprintf fmt "%a ~ %a" pp_line line pp_info info
 
 let pp_lineInfos fmt li = pp_lst_brk pp_lineInfo fmt li
-
-let pp_res res =
-  printf "%a@." pp_lineInfos res
+let pp_res res = printf "%a@." pp_lineInfos res

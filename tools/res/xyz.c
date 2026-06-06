@@ -4,16 +4,16 @@
 int x = 0;
 int y = 1;
 const int z = 2;
-int res = 42;
+int sum = 0;
 
 SEC("xdp")
 int xdp_demo(void *ctx)
 {
-	int sum = x + y + z;
+	sum += x + y + z;
 
 	char *chaine = "Calcul : \n";
 
-	if (sum == res) {
+	if (sum == 42) {
 		bpf_printk("%s Nope\n", chaine);
 		return XDP_ABORTED;
 	}
