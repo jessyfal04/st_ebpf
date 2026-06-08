@@ -2,26 +2,10 @@ open Table
 
 type fonction = {
   name : string;
-  section_name : string;
-  offset : int64;
-  size : int;
   bind : string;
   is_entry : bool;
   code : Info.line_info list;
 }
-
-type context = {
-  symbols : symbol_table;
-  sections : section_table;
-}
-
-let section_name_of_idx ctx section_idx =
-  match Hashtbl.find_opt ctx.sections section_idx with
-  | Some section -> section.name
-  | None -> failwith "Invalid section_name_of_idx"
-
-let safe_section_name section_name =
-  String.map (fun c -> if c = '/' then '_' else c) section_name
 
 let in_function_range pc offset size =
   let pc = Int64.of_int pc in
@@ -39,7 +23,7 @@ let extract_code texts section_name offset size =
   | Some lines ->
       let code = part_lines lines offset size in
       code
-  | None -> failwith "Invalid extract_function (section_name)"
+  | None -> failwith "Invalid extract_code (section_name)"
 
 let get_functions ctx texts =
   Hashtbl.fold
@@ -51,9 +35,6 @@ let get_functions ctx texts =
           let size = symbol.size in
           {
             name = symbol.name;
-            section_name = section_name;
-            offset = offset;
-            size = size;
             bind = symbol.bind;
             is_entry = section_name <> ".text";
             code = extract_code texts section_name offset size;

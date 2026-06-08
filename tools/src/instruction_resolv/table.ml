@@ -15,6 +15,12 @@ type reloc = { offset : int64; reloc_typ : reloc_type; value : string }
 type section_table = (int, section) Hashtbl.t
 type symbol_table = (string, symbol) Hashtbl.t
 type reloc_table = (int64, reloc) Hashtbl.t
+type context = {
+  basename : string;
+  symbols : symbol_table;
+  sections : section_table;
+  relocs : reloc_table option;
+}
 
 let parse_hex_int s = Int64.of_string ("0x" ^ s)
 
@@ -79,3 +85,40 @@ let load_relocs ic : reloc_table =
   in
   let add tbl reloc = Hashtbl.replace tbl reloc.offset reloc in
   load_tsv ic ~create:(fun () -> Hashtbl.create 16) ~parse_row ~add
+
+(* Helpers *)
+let reloc_here ctx pc : reloc option =
+  match ctx.relocs with
+  | Some relocs -> Hashtbl.find_opt relocs (Int64.of_int pc)
+  | None -> None
+
+let section_name_of_idx ctx section_idx =
+  match Hashtbl.find_opt ctx.sections section_idx with
+  | Some section -> section.name
+  | None -> failwith "Invalid section_name_of_idx"
+
+let section_idx_of_symbol symbol =
+  match symbol.ndx with
+  | SECTION_NDX idx -> idx
+  | OTHER_NDX _ -> failwith "Invalid section_idx_of_symbol"
+
+let safe_section_name section_name =
+  String.map (fun c -> if c = '/' then '_' else c) section_name
+
+let section_idx_of_section_name ctx section_name =
+  match
+    Hashtbl.to_seq ctx.sections
+    |> Seq.find_map (fun (idx, (section : section)) ->
+           if safe_section_name section.name = section_name then Some idx else None)
+  with
+  | Some idx -> idx
+  | None -> failwith "Invalid section_idx_of_section_name"
+
+let func_at_offset ctx section_idx offset =
+  Hashtbl.to_seq_values ctx.symbols
+  |> Seq.find_map (fun (symbol : symbol) ->
+         match symbol.ndx with
+         | SECTION_NDX idx
+           when idx = section_idx && symbol.typ = "FUNC" && symbol.value = offset ->
+             Some symbol
+         | _ -> None)

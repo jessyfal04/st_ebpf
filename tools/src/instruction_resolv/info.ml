@@ -220,59 +220,16 @@ let bpf_func_names =
 type info = BPF_FUNC of string | CALL_DEST of string * int64 | LOAD_DEST of string * int64
 type line_info = line * info option
 
-type context = {
-  basename : string;
-  symbols : symbol_table;
-  sections : section_table;
-  relocs : reloc_table option;
-}
-
-let reloc_here ctx pc : reloc option =
-  match ctx.relocs with
-  | Some relocs -> Hashtbl.find_opt relocs (Int64.of_int pc)
-  | None -> None
-
-let section_name_of_idx ctx section_idx =
-  match Hashtbl.find_opt ctx.sections section_idx with
-  | Some section -> section.name
-  | None -> failwith "Invalid section_name_of_idx"
-
-let section_idx_of_symbol symbol =
-  match symbol.ndx with
-  | SECTION_NDX idx -> idx
-  | OTHER_NDX _ -> failwith "Invalid section_idx_of_symbol"
-
-let safe_section_name section_name =
-  String.map (fun c -> if c = '/' then '_' else c) section_name
-
-let section_idx_of_section_name ctx section_name =
-  match
-    Hashtbl.to_seq ctx.sections
-    |> Seq.find_map (fun (idx, (section : section)) ->
-           if section.name = section_name
-              || safe_section_name section.name = section_name
-           then Some idx
-           else None)
-  with
-  | Some idx -> idx
-  | None -> failwith "Invalid section_idx_of_section_name"
-
-let func_at_offset ctx section_idx offset =
-  Hashtbl.to_seq_values ctx.symbols
-  |> Seq.find_map (fun (symbol : symbol) ->
-         match symbol.ndx with
-         | SECTION_NDX idx
-           when idx = section_idx && symbol.typ = "FUNC"
-                && symbol.value = offset ->
-             Some symbol
-         | _ -> None)
-
 let resolve_call_bpf_func imm =
   let id = Int32.to_int imm in
   if 0 <= id && id < Array.length bpf_func_names then
     Some (BPF_FUNC bpf_func_names.(id))
   else failwith "Invalid resolve_call_bpf_func"
 
+let func_call_dest ctx section_idx target_offset =
+  match func_at_offset ctx section_idx target_offset with
+  | Some func -> Some (CALL_DEST (func.name, Int64.sub target_offset func.value))
+  | None -> failwith "Invalid resolve_call_dest (no FUNC found)"
 
 let resolve_call_reloc ctx reloc imm =
   if reloc.reloc_typ = R_BPF_64_32 then
@@ -284,21 +241,9 @@ let resolve_call_reloc ctx reloc imm =
           Some (CALL_DEST (symbol.name, target_offset))
         else
           let section_idx = section_idx_of_symbol symbol in
-          (match func_at_offset ctx section_idx target_offset with
-          | Some func ->
-              Some (CALL_DEST (func.name, Int64.sub target_offset func.value))
-          | None -> failwith "Invalid resolve_call_reloc (no FUNC found)")
+          func_call_dest ctx section_idx target_offset
     | None -> failwith "Invalid resolve_call_reloc (symbol)"
   else failwith "Invalid resolve_call_reloc (reloc_typ)"
-
-let resolve_load_reloc ctx reloc =
-  if reloc.reloc_typ = R_BPF_64_64 then
-    match Hashtbl.find_opt ctx.symbols reloc.value with
-    | Some symbol ->
-        let section_idx = section_idx_of_symbol symbol in
-        Some (LOAD_DEST (section_name_of_idx ctx section_idx, symbol.value))
-    | None -> failwith "Invalid resolve_load_reloc (symbol)"
-  else failwith "Invalid resolve_load_reloc (reloc_typ)"
 
 let resolve_call_no_reloc ctx pc imm =
   (* formula : target_offset = pc + 8 + imm * 8 *)
@@ -308,10 +253,16 @@ let resolve_call_no_reloc ctx pc imm =
       (Int64.mul (Int64.of_int32 imm) 8L)
   in
   let section_idx = section_idx_of_section_name ctx ctx.basename in
-  match func_at_offset ctx section_idx target_offset with
-          | Some func ->
-      Some (CALL_DEST (func.name, target_offset))
-    | None -> failwith "Invalid resolve_call_no_reloc (no FUNC found)"
+  func_call_dest ctx section_idx target_offset
+
+let resolve_load_reloc ctx reloc =
+  if reloc.reloc_typ = R_BPF_64_64 then
+    match Hashtbl.find_opt ctx.symbols reloc.value with
+    | Some symbol ->
+        let section_idx = section_idx_of_symbol symbol in
+        Some (LOAD_DEST (section_name_of_idx ctx section_idx, symbol.value))
+    | None -> failwith "Invalid resolve_load_reloc (symbol)"
+  else failwith "Invalid resolve_load_reloc (reloc_typ)"
 
 let parse_info ctx (line : line) : line_info =
   match line with

@@ -45,14 +45,22 @@ let () =
   let symb_table = auto_in_file (dir ^ "/symb.tsv") load_symbols in
   let section_table = auto_in_file (dir ^ "/sections.tsv") load_sections in
 
+  let ctx =
+    {
+      basename = "";
+      symbols = symb_table;
+      sections = section_table;
+      relocs = None;
+    }
+  in
+
   let texts_infos =
     List.map
       (fun (filename, text) ->
         let ctx =
           {
+            ctx with
             basename = filename;
-            symbols = symb_table;
-            sections = section_table;
             relocs = text.reloc;
           }
         in
@@ -60,9 +68,8 @@ let () =
       texts
   in
 
-  let texts_fonctions =
-    extract_functions texts_infos
-      { symbols = symb_table; sections = section_table }
+  let fonctions =
+    extract_functions texts_infos ctx
   in
 
   (* Affichage ! *)
@@ -71,4 +78,4 @@ let () =
     (fun fonction ->
       print_endline "";
       Format.printf "%a@." Pp.pp_fonction fonction)
-    texts_fonctions
+    fonctions

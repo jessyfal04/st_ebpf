@@ -29,12 +29,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "todo.md",
+                "file": "day/2026_06_05.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "todo"
+              "title": "2026_06_05"
             }
           }
         ],
@@ -206,10 +206,13 @@
   },
   "active": "45805bf14535bf7d",
   "lastOpenFiles": [
-    "sigles.md",
-    "day/2026_06_05.md",
+    "Pasted image 20260603103336.png",
+    "Pasted image 20260603102954.png",
     "day/2026_06_04.md",
+    "day/2026_06_05.md",
+    "day/2026_06_08.md",
     "todo.md",
+    "sigles.md",
     "ressources.md",
     "pdf/sujet_stage.pdf",
     "pdf/lib/ebpf_wasm.pdf",
@@ -230,8 +233,6 @@
     "autre/c_to_ebpf.md",
     "Untitled.md",
     "pdf/lib/Unconfirmed 20351.crdownload",
-    "Pasted image 20260603102954.png",
-    "Pasted image 20260603103336.png",
     "day/2026_06_02.md",
     "pdf/lib/Rapport_PSTL-eBPF.pdf",
     "notes.md",
@@ -241,8 +242,6 @@
     "ia.md",
     "autre/questions.md",
     "Rapport_PSTL.md",
-    "notes/C_to_EBPF.md",
-    "notes/Instruction Set Architecture.md",
-    "[[thesis_monat.pdf]].md"
+    "notes/C_to_EBPF.md"
   ]
 }
