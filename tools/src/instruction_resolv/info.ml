@@ -242,6 +242,21 @@ let section_idx_of_symbol symbol =
   | SECTION_NDX idx -> idx
   | OTHER_NDX _ -> failwith "Invalid section_idx_of_symbol"
 
+let safe_section_name section_name =
+  String.map (fun c -> if c = '/' then '_' else c) section_name
+
+let section_idx_of_section_name ctx section_name =
+  match
+    Hashtbl.to_seq ctx.sections
+    |> Seq.find_map (fun (idx, (section : section)) ->
+           if section.name = section_name
+              || safe_section_name section.name = section_name
+           then Some idx
+           else None)
+  with
+  | Some idx -> idx
+  | None -> failwith "Invalid section_idx_of_section_name"
+
 let func_at_offset ctx section_idx offset =
   Hashtbl.to_seq_values ctx.symbols
   |> Seq.find_map (fun (symbol : symbol) ->
@@ -292,7 +307,11 @@ let resolve_call_no_reloc ctx pc imm =
       (Int64.of_int (pc + 8))
       (Int64.mul (Int64.of_int32 imm) 8L)
   in
-  Some (CALL_DEST (ctx.basename, target_offset))
+  let section_idx = section_idx_of_section_name ctx ctx.basename in
+  match func_at_offset ctx section_idx target_offset with
+          | Some func ->
+      Some (CALL_DEST (func.name, target_offset))
+    | None -> failwith "Invalid resolve_call_no_reloc (no FUNC found)"
 
 let parse_info ctx (line : line) : line_info =
   match line with

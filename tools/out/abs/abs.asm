@@ -1,36 +1,5 @@
 --FONCTIONS--
 
-my_abs [bind=LOCAL, entry=false]
-0 : instr(STX(W,MEM), dst=10, src=1, offset=-8, imm=0) ~ ¤
-8 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
-16 : instr(JMP32(K,JSGT), dst=1, src=0, offset=5, imm=-1) ~ ¤
-24 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
-32 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
-40 : instr(ALU(K,NEG), dst=1, src=0, offset=0, imm=0) ~ ¤
-48 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
-56 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=3, imm=0) ~ ¤
-64 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
-72 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
-80 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
-88 : instr(LDX(W,MEM), dst=0, src=10, offset=-4, imm=0) ~ ¤
-96 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ ¤
-
-my_min [bind=LOCAL, entry=false]
-104 : instr(STX(W,MEM), dst=10, src=1, offset=-8, imm=0) ~ ¤
-112 : instr(STX(W,MEM), dst=10, src=2, offset=-12, imm=0) ~ ¤
-120 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
-128 : instr(LDX(W,MEM), dst=2, src=10, offset=-12, imm=0) ~ ¤
-136 : instr(JMP32(X,JSGE), dst=1, src=2, offset=4, imm=0) ~ ¤
-144 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
-152 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
-160 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
-168 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=3, imm=0) ~ ¤
-176 : instr(LDX(W,MEM), dst=1, src=10, offset=-12, imm=0) ~ ¤
-184 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
-192 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
-200 : instr(LDX(W,MEM), dst=0, src=10, offset=-4, imm=0) ~ ¤
-208 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ ¤
-
 xdp_demo [bind=GLOBAL, entry=true]
 0 : instr(STX(DW,MEM), dst=10, src=1, offset=-16, imm=0) ~ ¤
 8 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=-2) ~ ¤
@@ -63,3 +32,34 @@ xdp_demo [bind=GLOBAL, entry=true]
 224 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
 232 : instr(LDX(W,MEM), dst=0, src=10, offset=-4, imm=0) ~ ¤
 240 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ ¤
+
+my_abs [bind=LOCAL, entry=false]
+0 : instr(STX(W,MEM), dst=10, src=1, offset=-8, imm=0) ~ ¤
+8 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
+16 : instr(JMP32(K,JSGT), dst=1, src=0, offset=5, imm=-1) ~ ¤
+24 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
+32 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
+40 : instr(ALU(K,NEG), dst=1, src=0, offset=0, imm=0) ~ ¤
+48 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
+56 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=3, imm=0) ~ ¤
+64 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
+72 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
+80 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
+88 : instr(LDX(W,MEM), dst=0, src=10, offset=-4, imm=0) ~ ¤
+96 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ ¤
+
+my_min [bind=LOCAL, entry=false]
+104 : instr(STX(W,MEM), dst=10, src=1, offset=-8, imm=0) ~ ¤
+112 : instr(STX(W,MEM), dst=10, src=2, offset=-12, imm=0) ~ ¤
+120 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
+128 : instr(LDX(W,MEM), dst=2, src=10, offset=-12, imm=0) ~ ¤
+136 : instr(JMP32(X,JSGE), dst=1, src=2, offset=4, imm=0) ~ ¤
+144 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
+152 : instr(LDX(W,MEM), dst=1, src=10, offset=-8, imm=0) ~ ¤
+160 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
+168 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=3, imm=0) ~ ¤
+176 : instr(LDX(W,MEM), dst=1, src=10, offset=-12, imm=0) ~ ¤
+184 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ ¤
+192 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ ¤
+200 : instr(LDX(W,MEM), dst=0, src=10, offset=-4, imm=0) ~ ¤
+208 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ ¤
