@@ -27,14 +27,16 @@
             "id": "45805bf14535bf7d",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "pdf",
               "state": {
-                "file": "day/2026_06_05.md",
-                "mode": "source",
-                "source": false
+                "file": "pdf/lib/static_analysis.pdf",
+                "page": 11,
+                "left": -12,
+                "top": 452,
+                "zoom": 1.4019607843137254
               },
-              "icon": "lucide-file",
-              "title": "2026_06_05"
+              "icon": "lucide-file-text",
+              "title": "static_analysis"
             }
           }
         ],
@@ -206,10 +208,11 @@
   },
   "active": "45805bf14535bf7d",
   "lastOpenFiles": [
+    "pdf/lib/Formal Semantics ebpf ISA.pdf",
+    "day/2026_06_05.md",
     "Pasted image 20260603103336.png",
     "Pasted image 20260603102954.png",
     "day/2026_06_04.md",
-    "day/2026_06_05.md",
     "day/2026_06_08.md",
     "todo.md",
     "sigles.md",
@@ -221,7 +224,6 @@
     "pdf/lib/verifier_review.pdf",
     "pdf/lib/static_analysis.pdf",
     "autre/Autres Articles.md",
-    "pdf/lib/Formal Semantics ebpf ISA.pdf",
     "day/2026_06_03.md",
     "autre/Sections.md",
     "autre/Rapport_PSTL.md",
