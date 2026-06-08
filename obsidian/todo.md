@@ -1,18 +1,21 @@
 # Next
-- Print en mode beau!
-- Faire une passe finale pour les rejets? 
-- *A quoi sert la variable ctx context ? généralement*
+- **Print en mode beau!**
+- Ajouter une info pour les goto
+- Faire une passe finale pour les rejets
 - Lire le git d'Erwan pour apprendre eBPF!
 
 # Questions
-- Il faut récupérer les /data dans le Ocaml?
-- Extraire les informations BTF? Notamment pour les .maps?
-- Calcul des GOTO inter-fichiers mais dans des fonctions différentes?
-- Recalculer les lignes vu qu'on raisonne par fonction désormais?
+- Il faut récupérer les /data dans notre représentation Ocaml? Comment les modéliser / en région ?
+- Extraire les informations BTF, on en a besoin dans MOPSA? Notamment pour les .maps? Et pour savoir quels objets sont présents (et leur type / taille ect...)
+- Dans MOPSA comment sont gérés les GOTO?
+- On a besoin de garder en mémoire call_dest(odd,**N**) le N de call_dest?
+- Recalculer le n° de lignes vu qu'on raisonne par fonction désormais?
 
 # Later
 - Lire thèse qui explique MOPSA
 - Créateur d'AST
 - Voir ce qu'on peut réutiliser de C
 - Model. noyau linux pour intéractions avec lui
-- Quel warning ; quel alarmes pour ebpf ? (div 0 et tt, instruction spéciales)
+- Quel warning ; quel alarmes pour ebpf ? 
+	- offset/taille, pb de région, div 0 et tt, instruction spéciales
+	- goto en dehors d'une fonction?

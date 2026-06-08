@@ -42,8 +42,8 @@ let () =
   in
 
   (* Ouvrir la table des symboles et la table des sections *)
-  let symb_table = auto_in_file (dir ^ "/symb.tsv") load_symbols in
-  let section_table = auto_in_file (dir ^ "/sections.tsv") load_sections in
+  let symb_table = auto_in_file (dir ^ "/tsv/symb.tsv") load_symbols in
+  let section_table = auto_in_file (dir ^ "/tsv/sections.tsv") load_sections in
 
   let ctx =
     {

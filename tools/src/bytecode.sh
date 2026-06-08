@@ -10,13 +10,14 @@ obj=$1
 basename=$(basename "$obj" .o)
 
 # Sous-dossiers résurssivement
-for dir in code reloc data; do
+for dir in code reloc data tsv; do
     mkdir -p "out/$basename/$dir"
 done
 
 # Listage des SECTION présentes
 # readelf -S $obj --wide > "out/$basename/sections/_sections_readelf.txt"
 # llvm-objdump -h "$obj" > "out/$basename/sections/_sections_llvm-objdump.txt"
+llvm-objdump -h "$obj" > "out/$basename/tsv/sections.txt"
 {
     printf "IDX\tNAME\tSIZE\tTYPE\n"
     llvm-objdump -h "$obj" |
@@ -25,7 +26,7 @@ done
             print $1 "\t" $2 "\t" $3 "\t" $5
         }
     '
-} > "out/$basename/sections.tsv"
+} > "out/$basename/tsv/sections.tsv"
 
 # Extrait la section de CODE (type TEXT) et non vides, et de leurs sections si non vide
 llvm-objdump -h "$obj" |
@@ -79,7 +80,7 @@ done
 #     llvm-nm -S --defined-only "$obj" | awk 'NF >= 4 { print $1 "\t" $2 "\t" $3 "\t" $4 }'
 # } > "out/$basename/symb/${basename}_symb.tsv"
 # echo "Symboles extraits."
-
+llvm-readelf -s --wide "$obj" > "out/$basename/tsv/symb.txt"
 {
     printf "VALUE\tSIZE\tTYPE\tBIND\tNDX\tNAME\n"
     llvm-readelf -s --wide "$obj" |
@@ -88,8 +89,79 @@ done
             print $2 "\t" $3 "\t" $4 "\t" $5 "\t" $7 "\t" $8
         }
     '
-} > "out/$basename/symb.tsv"
+} > "out/$basename/tsv/symb.tsv"
 echo "Symboles avec section extraits."
 
-# Extraction des types (.BTF)
-bpftool btf dump file $obj > "out/$basename/btf.txt"
+# Extraction des types (.BTF) - IA TSV
+bpftool btf dump file $obj > "out/$basename/tsv/btf.txt"
+bpftool btf dump file "$obj" format raw | 
+awk '
+BEGIN {
+    OFS = "\t"
+    print "PARENT_ID", "ID", "KIND", "NAME", "ATTRS"
+}
+
+function trim(s) {
+    sub(/^[[:space:]]+/, "", s)
+    sub(/[[:space:]]+$/, "", s)
+    return s
+}
+
+function qname(s,    q) {
+    q = sprintf("%c", 39) # single quote
+    if (match(s, q "[^" q "]*" q))
+        return substr(s, RSTART + 1, RLENGTH - 2)
+    return ""
+}
+
+# Top-level BTF entry:
+# [4] FUNC '\''xdp_demo'\'' type_id=1 linkage=global
+/^\[[0-9]+\]/ {
+    raw = $0
+
+    id = raw
+    sub(/^\[/, "", id)
+    sub(/\].*$/, "", id)
+
+    rest = raw
+    sub(/^\[[0-9]+\][[:space:]]+/, "", rest)
+
+    kind = rest
+    sub(/[[:space:]].*$/, "", kind)
+
+    name = qname(rest)
+
+    attrs = rest
+    sub(/^[A-Z_]+[[:space:]]+/, "", attrs)
+
+    q = sprintf("%c", 39)
+    sub(q "[^" q "]*" q "[[:space:]]*", "", attrs)
+
+    cur_id = id
+    cur_kind = kind
+
+    print "", id, kind, name, trim(attrs)
+    next
+}
+
+# Child line: struct member, func param, datasec var
+/^[[:space:]]+/ && cur_id != "" {
+    raw = trim($0)
+    name = qname(raw)
+
+    child_kind = "CHILD"
+    if (cur_kind == "STRUCT" || cur_kind == "UNION")
+        child_kind = "MEMBER"
+    else if (cur_kind == "FUNC_PROTO")
+        child_kind = "PARAM"
+    else if (cur_kind == "DATASEC")
+        child_kind = "DATASEC_ENTRY"
+
+    attrs = raw
+    q = sprintf("%c", 39)
+    sub(q "[^" q "]*" q "[[:space:]]*", "", attrs)
+
+    print cur_id, "", child_kind, name, trim(attrs)
+    next
+}
+' > "out/$basename/tsv/btf.tsv"

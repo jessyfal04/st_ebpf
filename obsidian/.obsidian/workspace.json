@@ -13,14 +13,14 @@
             "state": {
               "type": "pdf",
               "state": {
-                "file": "pdf/lib/Formal Semantics ebpf ISA.pdf",
-                "page": 12,
-                "left": -8,
-                "top": 402,
-                "zoom": 1.7654320987654322
+                "file": "pdf/lib/thesis_monat.pdf",
+                "page": 3,
+                "left": -10,
+                "top": 95,
+                "zoom": 1.4413482149456724
               },
               "icon": "lucide-file-text",
-              "title": "Formal Semantics ebpf ISA"
+              "title": "thesis_monat"
             }
           },
           {
@@ -32,15 +32,14 @@
                 "file": "pdf/lib/static_analysis.pdf",
                 "page": 11,
                 "left": -12,
-                "top": 452,
+                "top": 587,
                 "zoom": 1.4019607843137254
               },
               "icon": "lucide-file-text",
               "title": "static_analysis"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -206,23 +205,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "45805bf14535bf7d",
+  "active": "d7cf4b64b9730187",
   "lastOpenFiles": [
+    "todo.md",
+    "ressources.md",
     "pdf/lib/Formal Semantics ebpf ISA.pdf",
+    "pdf/lib/static_analysis.pdf",
     "day/2026_06_05.md",
     "Pasted image 20260603103336.png",
     "Pasted image 20260603102954.png",
     "day/2026_06_04.md",
     "day/2026_06_08.md",
-    "todo.md",
     "sigles.md",
-    "ressources.md",
     "pdf/sujet_stage.pdf",
     "pdf/lib/ebpf_wasm.pdf",
     "pdf/lib/thesis_monat.pdf",
     "pdf/lib/automatic_synthesis.pdf",
     "pdf/lib/verifier_review.pdf",
-    "pdf/lib/static_analysis.pdf",
     "autre/Autres Articles.md",
     "day/2026_06_03.md",
     "autre/Sections.md",

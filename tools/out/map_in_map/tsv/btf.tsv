@@ -1,0 +1,33 @@
+PARENT_ID	ID	KIND	NAME	ATTRS
+	1	PTR	(anon)	type_id=3
+	2	INT	int	size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+	3	ARRAY	(anon)	type_id=2 index_type_id=4 nr_elems=2
+	4	INT	__ARRAY_SIZE_TYPE__	size=4 bits_offset=0 nr_bits=32 encoding=(none)
+	5	PTR	(anon)	type_id=6
+	6	TYPEDEF	__u32	type_id=7
+	7	INT	unsigned int	size=4 bits_offset=0 nr_bits=32 encoding=(none)
+	8	PTR	(anon)	type_id=9
+	9	ARRAY	(anon)	type_id=2 index_type_id=4 nr_elems=1
+	10	STRUCT	(anon)	size=32 vlen=4
+10		MEMBER	type	type_id=1 bits_offset=0
+10		MEMBER	key	type_id=5 bits_offset=64
+10		MEMBER	value	type_id=5 bits_offset=128
+10		MEMBER	max_entries	type_id=8 bits_offset=192
+	11	VAR	inner_map	type_id=10, linkage=global
+	12	PTR	(anon)	type_id=13
+	13	ARRAY	(anon)	type_id=2 index_type_id=4 nr_elems=12
+	14	STRUCT	(anon)	size=24 vlen=4
+14		MEMBER	type	type_id=12 bits_offset=0
+14		MEMBER	max_entries	type_id=8 bits_offset=64
+14		MEMBER	key	type_id=5 bits_offset=128
+14		MEMBER	values	type_id=16 bits_offset=192
+	15	PTR	(anon)	type_id=10
+	16	ARRAY	(anon)	type_id=15 index_type_id=4 nr_elems=0
+	17	VAR	array_of_maps	type_id=14, linkage=global
+	18	FUNC_PROTO	(anon)	ret_type_id=2 vlen=1
+18		PARAM	(anon)	type_id=19
+	19	PTR	(anon)	type_id=0
+	20	FUNC	func	type_id=18 linkage=global
+	21	DATASEC	.maps	size=0 vlen=2
+21		DATASEC_ENTRY	inner_map	type_id=11 offset=0 size=32 (VAR )
+21		DATASEC_ENTRY	array_of_maps	type_id=17 offset=0 size=32 (VAR )

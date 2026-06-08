@@ -1,0 +1,14 @@
+
+Symbol table '.symtab' contains 11 entries:
+   Num:    Value          Size Type    Bind   Vis       Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT   ABS loop_prevail.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT     3 test_md
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT     4 .debug_abbrev
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT     7 .debug_str_offsets
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT     9 .debug_str
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    10 .debug_addr
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    15 .debug_frame
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    17 .debug_line
+     9: 0000000000000000     0 SECTION LOCAL  DEFAULT    19 .debug_line_str
+    10: 0000000000000000   520 FUNC    GLOBAL DEFAULT     3 foo

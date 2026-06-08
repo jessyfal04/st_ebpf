@@ -1,0 +1,16 @@
+
+Symbol table '.symtab' contains 13 entries:
+   Num:    Value          Size Type    Bind   Vis       Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT   ABS map_in_map.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT     2 .text
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT     6 .debug_abbrev
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT     9 .debug_str_offsets
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    11 .debug_str
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    12 .debug_addr
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    18 .debug_frame
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    20 .debug_line
+     9: 0000000000000000     0 SECTION LOCAL  DEFAULT    22 .debug_line_str
+    10: 0000000000000000   312 FUNC    GLOBAL DEFAULT     2 func
+    11: 0000000000000020    32 OBJECT  GLOBAL DEFAULT     4 array_of_maps
+    12: 0000000000000000    32 OBJECT  GLOBAL DEFAULT     4 inner_map

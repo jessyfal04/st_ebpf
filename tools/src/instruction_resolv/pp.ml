@@ -77,8 +77,7 @@ let pp_reloc_type fmt = function
   | R_BPF_64_32 -> fprintf fmt "R_BPF_64_32"
   | OTHER_RELOC s -> fprintf fmt "%s" s
 
-let pp_code_jmp fmt (j : code_jmp) =
-  match j with
+let pp_code_jmp fmt = function
   | JA t -> fprintf fmt "JA(%a)" pp_ja_type t
   | JEQ -> fprintf fmt "JEQ"
   | JGT -> fprintf fmt "JGT"
