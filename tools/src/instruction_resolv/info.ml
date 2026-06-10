@@ -243,7 +243,7 @@ let resolve_call_bpf_func imm =
 
 let func_call_dest ctx section_idx target_offset =
   match func_at_offset ctx section_idx target_offset with
-  | Some func -> CALL_DEST (func.name, Int64.sub target_offset func.value)
+  | Some func -> CALL_DEST (func.name, target_offset)
   | None -> failwith "Invalid resolve_call_dest (no FUNC found)"
 
 let resolve_call_reloc ctx reloc imm =

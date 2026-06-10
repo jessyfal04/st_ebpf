@@ -20,7 +20,7 @@ xdp_demo [bind=GLOBAL, entry=true]
 128 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=12, imm=0) ~ goto_dest(232)
 136 : instr(LDX(W,MEM), dst=1, src=10, offset=-20, imm=0) ~ 
 144 : instr(LDX(W,MEM), dst=2, src=10, offset=-24, imm=0) ~ 
-152 : instr(JMP(K,CALL(CALL_IMM)), dst=0, src=1, offset=0, imm=12) ~ call_dest(my_min,0)
+152 : instr(JMP(K,CALL(CALL_IMM)), dst=0, src=1, offset=0, imm=12) ~ call_dest(my_min,104)
 160 : instr(LDX(W,MEM), dst=1, src=10, offset=-20, imm=0) ~ 
 168 : instr(JMP32(X,JEQ), dst=0, src=1, offset=4, imm=0) ~ goto_dest(208)
 176 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ goto_dest(184)
