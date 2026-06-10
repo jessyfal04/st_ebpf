@@ -217,18 +217,32 @@ let bpf_func_names =
     "cgrp_storage_delete";
   |]
 
-type info = BPF_FUNC of string | CALL_DEST of string * int64 | LOAD_DEST of string * int64
-type line_info = line * info option
+type typ =
+| ARRAY of typ * int
+| PTR of typ
+| INT of int
+| STRUCT of int * int
+| OTHER of string
+| ELF
+| DATASEC
+
+type info =
+| BPF_FUNC of string 
+| CALL_DEST of string * int64 
+| LOAD_DEST of string * int64 
+| TYP of typ
+
+type line_info = line * info list
 
 let resolve_call_bpf_func imm =
   let id = Int32.to_int imm in
   if 0 <= id && id < Array.length bpf_func_names then
-    Some (BPF_FUNC bpf_func_names.(id))
+    BPF_FUNC bpf_func_names.(id)
   else failwith "Invalid resolve_call_bpf_func"
 
 let func_call_dest ctx section_idx target_offset =
   match func_at_offset ctx section_idx target_offset with
-  | Some func -> Some (CALL_DEST (func.name, Int64.sub target_offset func.value))
+  | Some func -> CALL_DEST (func.name, Int64.sub target_offset func.value)
   | None -> failwith "Invalid resolve_call_dest (no FUNC found)"
 
 let resolve_call_reloc ctx reloc imm =
@@ -238,7 +252,7 @@ let resolve_call_reloc ctx reloc imm =
     match Hashtbl.find_opt ctx.symbols reloc.value with
     | Some symbol ->
         if symbol.typ = "FUNC" then
-          Some (CALL_DEST (symbol.name, target_offset))
+          CALL_DEST (symbol.name, target_offset)
         else
           let section_idx = section_idx_of_symbol symbol in
           func_call_dest ctx section_idx target_offset
@@ -255,28 +269,61 @@ let resolve_call_no_reloc ctx pc imm =
   let section_idx = section_idx_of_section_name ctx ctx.basename in
   func_call_dest ctx section_idx target_offset
 
+let btf_attr_int btf key =
+  match List.assoc_opt key btf.attrs with
+  | Some value -> int_of_string value
+  | None -> -1
+
+let rec parse_btf ctx btf_id =
+  match Hashtbl.find_opt ctx.btf btf_id with
+  | None -> OTHER "IDK"
+  | Some btf -> (
+      let suite =
+        parse_btf ctx (btf_attr_int btf "type_id")
+      in
+      match btf.kind with
+      | "INT" -> INT (btf_attr_int btf "size")
+      | "ARRAY" -> ARRAY (parse_btf ctx (btf_attr_int btf "type_id"), btf_attr_int btf "nr_elems")
+      | "PTR" -> PTR suite
+      | "VAR" | "TYPEDEF" | "CONST" -> suite
+      | "DATASEC" -> DATASEC
+      | "STRUCT" -> STRUCT ((btf_attr_int btf "size"), (btf_attr_int btf "vlen"))
+      | _ -> if btf.name <> "" then OTHER btf.name else OTHER btf.kind)
+
 let resolve_load_reloc ctx reloc =
   if reloc.reloc_typ = R_BPF_64_64 then
     match Hashtbl.find_opt ctx.symbols reloc.value with
     | Some symbol ->
-        let section_idx = section_idx_of_symbol symbol in
-        Some (LOAD_DEST (section_name_of_idx ctx section_idx, symbol.value))
+        let ld =
+          let section_idx = section_idx_of_symbol symbol in
+          let section_name = section_name_of_idx ctx section_idx in
+          let symbol_value = symbol.value in
+          LOAD_DEST (section_name, symbol_value)
+        in
+
+        let typ =
+          match btf_of_btf_name_opt ctx symbol.name with
+          | Some btf -> [ TYP (parse_btf ctx btf.id) ]
+          | None -> [ TYP ELF ]
+        in
+
+        ld :: typ
     | None -> failwith "Invalid resolve_load_reloc (symbol)"
   else failwith "Invalid resolve_load_reloc (reloc_typ)"
 
 let parse_info ctx (line : line) : line_info =
   match line with
   | _, BASIC (JMP (K, CALL STATIC_ID), _, _, _, imm) ->
-      (line, resolve_call_bpf_func imm)
+      (line, resolve_call_bpf_func imm :: [])
   | pc, BASIC (JMP (K, CALL CALL_IMM), _, _, _, imm) -> (
       match reloc_here ctx pc with
-      | Some reloc -> (line, resolve_call_reloc ctx reloc imm)
-      | None -> (line, resolve_call_no_reloc ctx pc imm))
+      | Some reloc -> (line, resolve_call_reloc ctx reloc imm :: [])
+      | None -> (line, resolve_call_no_reloc ctx pc imm :: []))
   | pc, WIDE (LD (DW, IMM), _, _, _, _, _) -> (
       match reloc_here ctx pc with
       | Some reloc -> (line, resolve_load_reloc ctx reloc)
-      | None -> (line, None))
-  | _ -> (line, None)
+      | None -> (line, []))
+  | _ -> (line, [])
 
 let parse_infos ctx (lines : line list) : line_info list =
   List.map (parse_info ctx) lines

@@ -44,12 +44,14 @@ let () =
   (* Ouvrir la table des symboles et la table des sections *)
   let symb_table = auto_in_file (dir ^ "/tsv/symb.tsv") load_symbols in
   let section_table = auto_in_file (dir ^ "/tsv/sections.tsv") load_sections in
+  let btf_table = auto_in_file (dir ^ "/tsv/btf.tsv") load_btf in
 
   let ctx =
     {
       basename = "";
       symbols = symb_table;
       sections = section_table;
+      btf = btf_table;
       relocs = None;
     }
   in

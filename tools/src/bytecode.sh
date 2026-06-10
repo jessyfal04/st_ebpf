@@ -98,7 +98,7 @@ bpftool btf dump file "$obj" format raw |
 awk '
 BEGIN {
     OFS = "\t"
-    print "PARENT_ID", "ID", "KIND", "NAME", "ATTRS"
+    print "ID", "KIND", "NAME", "ATTRS"
 }
 
 function trim(s) {
@@ -140,28 +140,8 @@ function qname(s,    q) {
     cur_id = id
     cur_kind = kind
 
-    print "", id, kind, name, trim(attrs)
+    print id, kind, name, trim(attrs)
     next
 }
 
-# Child line: struct member, func param, datasec var
-/^[[:space:]]+/ && cur_id != "" {
-    raw = trim($0)
-    name = qname(raw)
-
-    child_kind = "CHILD"
-    if (cur_kind == "STRUCT" || cur_kind == "UNION")
-        child_kind = "MEMBER"
-    else if (cur_kind == "FUNC_PROTO")
-        child_kind = "PARAM"
-    else if (cur_kind == "DATASEC")
-        child_kind = "DATASEC_ENTRY"
-
-    attrs = raw
-    q = sprintf("%c", 39)
-    sub(q "[^" q "]*" q "[[:space:]]*", "", attrs)
-
-    print cur_id, "", child_kind, name, trim(attrs)
-    next
-}
 ' > "out/$basename/tsv/btf.tsv"

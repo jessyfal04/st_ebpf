@@ -1,15 +1,19 @@
 # Next
-- **Print en mode beau!**
-- Ajouter une info pour les goto
+- Info GOTO
+- Recalculer n de lignes fonctions OU mettre que le n de ligne de base sans offset pour les appels de fonction sans relocation
+
+- Analysiser les bts enfant (datasec et struct)
+- Récupérer de la /data intéressante
+
+- **Print en mode beau!
+
 - Faire une passe finale pour les rejets
 - Lire le git d'Erwan pour apprendre eBPF!
 
 # Questions
-- Il faut récupérer les /data dans notre représentation Ocaml? Comment les modéliser / en région ?
-- Extraire les informations BTF, on en a besoin dans MOPSA? Notamment pour les .maps? Et pour savoir quels objets sont présents (et leur type / taille ect...)
+- Il faut récupérer les /data dans notre représentation Ocaml? Comment les modéliser ? Une région avec un nb d'élément / des offset ? en utilisant DATASEC ?
 - Dans MOPSA comment sont gérés les GOTO?
 - On a besoin de garder en mémoire call_dest(odd,**N**) le N de call_dest?
-- Recalculer le n° de lignes vu qu'on raisonne par fonction désormais?
 
 # Later
 - Lire thèse qui explique MOPSA

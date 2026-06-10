@@ -122,16 +122,26 @@ let pp_instr fmt = function
 
 let pp_line fmt (n, instr) = fprintf fmt "%d : %a" n pp_instr instr
 
-let pp_info fmt = function
-  | Some (BPF_FUNC s) -> fprintf fmt "call_bpf(%s)" s
-  | Some (CALL_DEST (target, value)) ->
-      fprintf fmt "call_dest(%s,%Ld)" target value
-  | Some (LOAD_DEST (target, value)) ->
-      fprintf fmt "load_dest(%s,%Ld)" target value
-  | None -> fprintf fmt "¤"
+let rec pp_typ fmt = function
+  | ARRAY (t, n) -> fprintf fmt "array(%a, l.%d)" pp_typ t n
+  | PTR t -> fprintf fmt "ptr(%a)" pp_typ t
+  | INT size -> fprintf fmt "int(m.%d)" size
+  | STRUCT (s, l) -> fprintf fmt "struct(s.%d, v.%d)" s l
+  | DATASEC -> fprintf fmt "datasec"
+  | OTHER s -> fprintf fmt "other(%s)" s
+  | ELF -> fprintf fmt "elf"
 
-let rec pp_lineInfo fmt (line, info) =
-  fprintf fmt "%a ~ %a" pp_line line pp_info info
+let rec pp_info fmt = function
+  | BPF_FUNC s -> fprintf fmt "call_bpf(%s)" s
+  | CALL_DEST (target, value) ->
+      fprintf fmt "call_dest(%s,%Ld)" target value
+  | LOAD_DEST (target, value) ->
+      fprintf fmt "load_dest(%s,%Ld)" target value
+  | TYP typ -> fprintf fmt "typ(%a)" pp_typ typ
+and pp_infos fmt infos = pp_lst_cma pp_info fmt infos
+
+let rec pp_lineInfo fmt (line, infos) =
+  fprintf fmt "%a ~ %a" pp_line line pp_infos infos
 and pp_lineInfos fmt li = pp_lst_brk pp_lineInfo fmt li
 
 let pp_fonction fmt (fonction : fonction) =

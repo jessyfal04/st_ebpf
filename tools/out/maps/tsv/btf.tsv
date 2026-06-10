@@ -1,25 +1,18 @@
-PARENT_ID	ID	KIND	NAME	ATTRS
-	1	PTR	(anon)	type_id=3
-	2	INT	int	size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
-	3	ARRAY	(anon)	type_id=2 index_type_id=4 nr_elems=1
-	4	INT	__ARRAY_SIZE_TYPE__	size=4 bits_offset=0 nr_bits=32 encoding=(none)
-	5	PTR	(anon)	type_id=6
-	6	TYPEDEF	__u32	type_id=7
-	7	INT	unsigned int	size=4 bits_offset=0 nr_bits=32 encoding=(none)
-	8	STRUCT	(anon)	size=32 vlen=4
-8		MEMBER	type	type_id=1 bits_offset=0
-8		MEMBER	key	type_id=5 bits_offset=64
-8		MEMBER	value	type_id=5 bits_offset=128
-8		MEMBER	max_entries	type_id=1 bits_offset=192
-	9	VAR	map	type_id=8, linkage=global
-	10	FUNC_PROTO	(anon)	ret_type_id=2 vlen=1
-10		PARAM	(anon)	type_id=11
-	11	PTR	(anon)	type_id=0
-	12	FUNC	xdp_demo	type_id=10 linkage=global
-	13	INT	char	size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
-	14	ARRAY	(anon)	type_id=13 index_type_id=4 nr_elems=4
-	15	VAR	_license	type_id=14, linkage=global
-	16	DATASEC	.maps	size=0 vlen=1
-16		DATASEC_ENTRY	map	type_id=9 offset=0 size=32 (VAR )
-	17	DATASEC	license	size=0 vlen=1
-17		DATASEC_ENTRY	_license	type_id=15 offset=0 size=4 (VAR )
+ID	KIND	NAME	ATTRS
+1	PTR	(anon)	type_id=3
+2	INT	int	size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+3	ARRAY	(anon)	type_id=2 index_type_id=4 nr_elems=1
+4	INT	__ARRAY_SIZE_TYPE__	size=4 bits_offset=0 nr_bits=32 encoding=(none)
+5	PTR	(anon)	type_id=6
+6	TYPEDEF	__u32	type_id=7
+7	INT	unsigned int	size=4 bits_offset=0 nr_bits=32 encoding=(none)
+8	STRUCT	(anon)	size=32 vlen=4
+9	VAR	map	type_id=8, linkage=global
+10	FUNC_PROTO	(anon)	ret_type_id=2 vlen=1
+11	PTR	(anon)	type_id=0
+12	FUNC	xdp_demo	type_id=10 linkage=global
+13	INT	char	size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
+14	ARRAY	(anon)	type_id=13 index_type_id=4 nr_elems=4
+15	VAR	_license	type_id=14, linkage=global
+16	DATASEC	.maps	size=0 vlen=1
+17	DATASEC	license	size=0 vlen=1

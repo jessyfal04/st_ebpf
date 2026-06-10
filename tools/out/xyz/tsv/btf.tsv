@@ -1,31 +1,23 @@
-PARENT_ID	ID	KIND	NAME	ATTRS
-	1	FUNC_PROTO	(anon)	ret_type_id=2 vlen=1
-1		PARAM	(anon)	type_id=3
-	2	INT	int	size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
-	3	PTR	(anon)	type_id=0
-	4	FUNC	xdp_demo	type_id=1 linkage=global
-	5	VAR	x	type_id=2, linkage=global
-	6	VAR	y	type_id=2, linkage=global
-	7	CONST	(anon)	type_id=2
-	8	VAR	z	type_id=7, linkage=global
-	9	VAR	sum	type_id=2, linkage=global
-	10	INT	char	size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
-	11	ARRAY	(anon)	type_id=10 index_type_id=12 nr_elems=11
-	12	INT	__ARRAY_SIZE_TYPE__	size=4 bits_offset=0 nr_bits=32 encoding=(none)
-	13	CONST	(anon)	type_id=10
-	14	ARRAY	(anon)	type_id=13 index_type_id=12 nr_elems=9
-	15	VAR	xdp_demo.____fmt	type_id=14, linkage=static
-	16	VAR	xdp_demo.____fmt.1	type_id=14, linkage=static
-	17	ARRAY	(anon)	type_id=10 index_type_id=12 nr_elems=4
-	18	VAR	_license	type_id=17, linkage=global
-	19	DATASEC	.bss	size=0 vlen=2
-19		DATASEC_ENTRY	x	type_id=5 offset=0 size=4 (VAR )
-19		DATASEC_ENTRY	sum	type_id=9 offset=0 size=4 (VAR )
-	20	DATASEC	.data	size=0 vlen=1
-20		DATASEC_ENTRY	y	type_id=6 offset=0 size=4 (VAR )
-	21	DATASEC	.rodata	size=0 vlen=3
-21		DATASEC_ENTRY	z	type_id=8 offset=0 size=4 (VAR )
-21		DATASEC_ENTRY	xdp_demo.____fmt	type_id=15 offset=4 size=9 (VAR )
-21		DATASEC_ENTRY	xdp_demo.____fmt.1	type_id=16 offset=13 size=9 (VAR )
-	22	DATASEC	license	size=0 vlen=1
-22		DATASEC_ENTRY	_license	type_id=18 offset=0 size=4 (VAR )
+ID	KIND	NAME	ATTRS
+1	FUNC_PROTO	(anon)	ret_type_id=2 vlen=1
+2	INT	int	size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+3	PTR	(anon)	type_id=0
+4	FUNC	xdp_demo	type_id=1 linkage=global
+5	VAR	x	type_id=2, linkage=global
+6	VAR	y	type_id=2, linkage=global
+7	CONST	(anon)	type_id=2
+8	VAR	z	type_id=7, linkage=global
+9	VAR	sum	type_id=2, linkage=global
+10	INT	char	size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
+11	ARRAY	(anon)	type_id=10 index_type_id=12 nr_elems=11
+12	INT	__ARRAY_SIZE_TYPE__	size=4 bits_offset=0 nr_bits=32 encoding=(none)
+13	CONST	(anon)	type_id=10
+14	ARRAY	(anon)	type_id=13 index_type_id=12 nr_elems=9
+15	VAR	xdp_demo.____fmt	type_id=14, linkage=static
+16	VAR	xdp_demo.____fmt.1	type_id=14, linkage=static
+17	ARRAY	(anon)	type_id=10 index_type_id=12 nr_elems=4
+18	VAR	_license	type_id=17, linkage=global
+19	DATASEC	.bss	size=0 vlen=2
+20	DATASEC	.data	size=0 vlen=1
+21	DATASEC	.rodata	size=0 vlen=3
+22	DATASEC	license	size=0 vlen=1

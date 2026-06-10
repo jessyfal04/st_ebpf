@@ -8,35 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "d7cf4b64b9730187",
-            "type": "leaf",
-            "state": {
-              "type": "pdf",
-              "state": {
-                "file": "pdf/lib/thesis_monat.pdf",
-                "page": 3,
-                "left": -10,
-                "top": 95,
-                "zoom": 1.4413482149456724
-              },
-              "icon": "lucide-file-text",
-              "title": "thesis_monat"
-            }
-          },
-          {
             "id": "45805bf14535bf7d",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "pdf/lib/static_analysis.pdf",
-                "page": 11,
-                "left": -12,
-                "top": 587,
-                "zoom": 1.4019607843137254
+                "file": "todo.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-file-text",
-              "title": "static_analysis"
+              "icon": "lucide-file",
+              "title": "todo"
             }
           }
         ]
@@ -205,12 +187,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "d7cf4b64b9730187",
+  "active": "45805bf14535bf7d",
   "lastOpenFiles": [
-    "todo.md",
     "ressources.md",
-    "pdf/lib/Formal Semantics ebpf ISA.pdf",
     "pdf/lib/static_analysis.pdf",
+    "todo.md",
+    "pdf/lib/automatic_synthesis.pdf",
+    "pdf/lib/thesis_monat.pdf",
+    "pdf/lib/Formal Semantics ebpf ISA.pdf",
     "day/2026_06_05.md",
     "Pasted image 20260603103336.png",
     "Pasted image 20260603102954.png",
@@ -219,8 +203,6 @@
     "sigles.md",
     "pdf/sujet_stage.pdf",
     "pdf/lib/ebpf_wasm.pdf",
-    "pdf/lib/thesis_monat.pdf",
-    "pdf/lib/automatic_synthesis.pdf",
     "pdf/lib/verifier_review.pdf",
     "autre/Autres Articles.md",
     "day/2026_06_03.md",

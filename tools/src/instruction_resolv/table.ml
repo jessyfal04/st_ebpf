@@ -11,18 +11,40 @@ type symbol = {
   name : string;
 }
 
+type attr = string * string
+type btf = {
+  id : int;
+  kind : string;
+  name : string;
+  attrs : attr list;
+}
+
 type reloc = { offset : int64; reloc_typ : reloc_type; value : string }
 type section_table = (int, section) Hashtbl.t
 type symbol_table = (string, symbol) Hashtbl.t
 type reloc_table = (int64, reloc) Hashtbl.t
+type btf_table = (int, btf) Hashtbl.t
 type context = {
   basename : string;
   symbols : symbol_table;
   sections : section_table;
+  btf : btf_table;
   relocs : reloc_table option;
 }
 
 let parse_hex_int s = Int64.of_string ("0x" ^ s)
+
+let remove_cma s =
+  let len = String.length s in
+  if len > 0 && s.[len - 1] = ',' then String.sub s 0 (len - 1) else s
+
+let parse_attrs attrs =
+  String.split_on_char ' ' (String.concat "\t" attrs)
+    |> List.filter (fun s -> s <> "")
+    |> List.map (fun attr ->
+      match String.split_on_char '=' attr with
+      | [ key; value ] -> (key, remove_cma value)
+      | _ -> failwith "Invalid load_btf (attr)")
 
 let parse_reloc_type typ =
   match typ with
@@ -63,14 +85,14 @@ let load_symbols ic : symbol_table =
         {
           value = parse_hex_int value;
           size = int_of_string size;
-          typ;
-          bind;
+          typ = typ;
+          bind = bind;
           ndx = parse_symbol_ndx ndx;
-          name;
+          name = name;
         }
     | _ -> failwith "Invalid load_symbols"
   in
-  let add tbl symbol = Hashtbl.replace tbl symbol.name symbol in
+  let add tbl (symbol : symbol) = Hashtbl.replace tbl symbol.name symbol in
   load_tsv ic ~create:(fun () -> Hashtbl.create 16) ~parse_row ~add
 
 let load_relocs ic : reloc_table =
@@ -84,6 +106,18 @@ let load_relocs ic : reloc_table =
     | _ -> failwith "Invalid load_relocs"
   in
   let add tbl reloc = Hashtbl.replace tbl reloc.offset reloc in
+  load_tsv ic ~create:(fun () -> Hashtbl.create 16) ~parse_row ~add
+
+let load_btf ic : btf_table =
+  let parse_row = function
+    | id :: kind :: name :: attrs ->
+        let id = int_of_string id in
+        let attrs = parse_attrs attrs
+        in
+        { id; kind; name; attrs }
+    | _ -> failwith "Invalid load_btf"
+  in
+  let add tbl btf = Hashtbl.replace tbl btf.id btf in
   load_tsv ic ~create:(fun () -> Hashtbl.create 16) ~parse_row ~add
 
 (* Helpers *)
@@ -122,3 +156,8 @@ let func_at_offset ctx section_idx offset =
            when idx = section_idx && symbol.typ = "FUNC" && symbol.value = offset ->
              Some symbol
          | _ -> None)
+
+let btf_of_btf_name_opt ctx btf_name =
+  Hashtbl.to_seq_values ctx.btf
+  |> Seq.find_map (fun (btf : btf) ->
+         if btf.name = btf_name then Some btf else None)
