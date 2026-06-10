@@ -1,8 +1,8 @@
 # Next
-- Recalculer n de lignes fonctions OU mettre que le n de ligne de base sans offset pour les appels de fonction sans relocation
-
 - Analysiser les bts enfant (datasec et struct)
 - Récupérer de la /data intéressante
+	- représenter en région avec offset
+	- calculer lors des load de sections le vrai symbol chargé depuis DATASEC
 
 - **Print en mode beau!
 
@@ -10,7 +10,6 @@
 - Lire le git d'Erwan pour apprendre eBPF!
 
 # Questions
-- Il faut récupérer les /data dans notre représentation Ocaml? Comment les modéliser ? Une région avec un nb d'élément / des offset ? en utilisant DATASEC ?
 - Dans MOPSA comment sont gérés les GOTO?
 - On a besoin de garder en mémoire call_dest(odd,**N**) le N de call_dest?
 

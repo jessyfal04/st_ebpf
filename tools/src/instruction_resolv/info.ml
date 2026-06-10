@@ -253,7 +253,7 @@ let resolve_call_reloc ctx reloc imm =
     match Hashtbl.find_opt ctx.symbols reloc.value with
     | Some symbol ->
         if symbol.typ = "FUNC" then
-          CALL_DEST (symbol.name, target_offset)
+          CALL_DEST (symbol.name, Int64.add target_offset symbol.value)
         else
           let section_idx = section_idx_of_symbol symbol in
           func_call_dest ctx section_idx target_offset
