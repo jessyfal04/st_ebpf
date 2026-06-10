@@ -1,5 +1,4 @@
 # Next
-- Info GOTO
 - Recalculer n de lignes fonctions OU mettre que le n de ligne de base sans offset pour les appels de fonction sans relocation
 
 - Analysiser les bts enfant (datasec et struct)

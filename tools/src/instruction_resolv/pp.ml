@@ -137,6 +137,7 @@ let rec pp_info fmt = function
       fprintf fmt "call_dest(%s,%Ld)" target value
   | LOAD_DEST (target, value) ->
       fprintf fmt "load_dest(%s,%Ld)" target value
+  | GOTO_DEST line -> fprintf fmt "goto_dest(%d)" line
   | TYP typ -> fprintf fmt "typ(%a)" pp_typ typ
 and pp_infos fmt infos = pp_lst_cma pp_info fmt infos
 

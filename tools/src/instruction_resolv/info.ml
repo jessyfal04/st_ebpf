@@ -230,6 +230,7 @@ type info =
 | BPF_FUNC of string 
 | CALL_DEST of string * int64 
 | LOAD_DEST of string * int64 
+| GOTO_DEST of int
 | TYP of typ
 
 type line_info = line * info list
@@ -290,6 +291,7 @@ let rec parse_btf ctx btf_id =
       | "STRUCT" -> STRUCT ((btf_attr_int btf "size"), (btf_attr_int btf "vlen"))
       | _ -> if btf.name <> "" then OTHER btf.name else OTHER btf.kind)
 
+
 let resolve_load_reloc ctx reloc =
   if reloc.reloc_typ = R_BPF_64_64 then
     match Hashtbl.find_opt ctx.symbols reloc.value with
@@ -311,8 +313,22 @@ let resolve_load_reloc ctx reloc =
     | None -> failwith "Invalid resolve_load_reloc (symbol)"
   else failwith "Invalid resolve_load_reloc (reloc_typ)"
 
+let resolve_goto_offset pc offset =
+  GOTO_DEST (pc + 8 + (offset * 8))
+
+let resolve_goto_imm pc imm =
+  GOTO_DEST (pc + 8 + (Int32.to_int imm * 8))
+
 let parse_info ctx (line : line) : line_info =
   match line with
+  | pc, BASIC (JMP (_, JA OFFSET_JA), _, _, offset, _) ->
+      (line, resolve_goto_offset pc offset :: [])
+  | pc, BASIC (JMP32 (_, JA IMM_JA), _, _, _, imm) ->
+      (line, resolve_goto_imm pc imm :: [])
+  | pc, BASIC (JMP (_, jmp), _, _, offset, _) when is_cond_jump jmp ->
+      (line, resolve_goto_offset pc offset :: [])
+  | pc, BASIC (JMP32 (_, jmp), _, _, offset, _) when is_cond_jump jmp ->
+      (line, resolve_goto_offset pc offset :: [])
   | _, BASIC (JMP (K, CALL STATIC_ID), _, _, _, imm) ->
       (line, resolve_call_bpf_func imm :: [])
   | pc, BASIC (JMP (K, CALL CALL_IMM), _, _, _, imm) -> (

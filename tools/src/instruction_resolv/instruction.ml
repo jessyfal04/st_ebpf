@@ -140,6 +140,12 @@ type instr =
 
 type line = int * instr
 
+(* HELPERS *)
+let is_cond_jump = function
+  | JEQ | JGT | JGE | JSET | JNE | JSGT | JSGE
+  | JLT | JLE | JSLT | JSLE -> true
+  | _ -> false
+
 (* REVOLVERS *)
 let register_resolver reg =
   if 0 <= reg && reg <= 10 then reg else failwith "Invalid register"

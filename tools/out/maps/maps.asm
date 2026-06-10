@@ -23,17 +23,17 @@ xdp_demo [bind=GLOBAL, entry=true]
 160 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ call_bpf(map_lookup_elem)
 168 : instr(STX(DW,MEM), dst=10, src=0, offset=-40, imm=0) ~ 
 176 : instr(LDX(DW,MEM), dst=1, src=10, offset=-40, imm=0) ~ 
-184 : instr(JMP(K,JEQ), dst=1, src=0, offset=5, imm=0) ~ 
-192 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ 
+184 : instr(JMP(K,JEQ), dst=1, src=0, offset=5, imm=0) ~ goto_dest(232)
+192 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ goto_dest(200)
 200 : instr(LDX(DW,MEM), dst=1, src=10, offset=-40, imm=0) ~ 
 208 : instr(LDX(W,MEM), dst=1, src=1, offset=0, imm=0) ~ 
-216 : instr(JMP32(K,JEQ), dst=1, src=0, offset=4, imm=42) ~ 
-224 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ 
+216 : instr(JMP32(K,JEQ), dst=1, src=0, offset=4, imm=42) ~ goto_dest(256)
+224 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ goto_dest(232)
 232 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=0) ~ 
 240 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ 
-248 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=3, imm=0) ~ 
+248 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=3, imm=0) ~ goto_dest(280)
 256 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=2) ~ 
 264 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ 
-272 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ 
+272 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ goto_dest(280)
 280 : instr(LDX(W,MEM), dst=0, src=10, offset=-4, imm=0) ~ 
 288 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ 
