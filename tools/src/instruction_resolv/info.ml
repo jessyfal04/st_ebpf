@@ -221,10 +221,12 @@ type typ =
 | ARRAY of typ * int
 | PTR of typ
 | INT of int
-| STRUCT of int * int
+| STRUCT of int * int * struct_member list
 | OTHER of string
 | ELF
-| DATASEC
+| DATASEC of string * datasec_entry
+and struct_member = string * int * typ
+and datasec_entry = string * int * int * typ
 
 type info =
 | BPF_FUNC of string 
@@ -270,42 +272,60 @@ let resolve_call_no_reloc ctx pc imm =
   let section_idx = section_idx_of_section_name ctx ctx.basename in
   func_call_dest ctx section_idx target_offset
 
-let btf_attr_int btf key =
-  match List.assoc_opt key btf.attrs with
+let attr_int attrs key =
+  match List.assoc_opt key attrs with
   | Some value -> int_of_string value
   | None -> -1
 
-let rec parse_btf ctx btf_id =
+let rec parse_datasec_entry position ctx children =
+  match
+    List.find_opt
+      (fun (child : btf_child) -> Int64.of_int (attr_int child.attrs "offset") = position)
+      children
+  with
+  | Some child ->
+      ( child.name,
+        attr_int child.attrs "offset",
+        attr_int child.attrs "size",
+        parse_btf 0L ctx (attr_int child.attrs "type_id") )
+  | None -> failwith "Invalid DATASEC entry"
+
+and parse_btf position ctx btf_id =
   match Hashtbl.find_opt ctx.btf btf_id with
   | None -> OTHER "IDK"
   | Some btf -> (
-      let suite =
-        parse_btf ctx (btf_attr_int btf "type_id")
-      in
       match btf.kind with
-      | "INT" -> INT (btf_attr_int btf "size")
-      | "ARRAY" -> ARRAY (parse_btf ctx (btf_attr_int btf "type_id"), btf_attr_int btf "nr_elems")
-      | "PTR" -> PTR suite
-      | "VAR" | "TYPEDEF" | "CONST" -> suite
-      | "DATASEC" -> DATASEC
-      | "STRUCT" -> STRUCT ((btf_attr_int btf "size"), (btf_attr_int btf "vlen"))
+      | "INT" -> INT (attr_int btf.attrs "size")
+      | "ARRAY" -> ARRAY (parse_btf 0L ctx (attr_int btf.attrs "type_id"), attr_int btf.attrs "nr_elems")
+      | "PTR" -> PTR (parse_btf 0L ctx (attr_int btf.attrs "type_id"))
+      | "VAR" | "TYPEDEF" | "CONST" -> parse_btf 0L ctx (attr_int btf.attrs "type_id")
+      | "DATASEC" ->
+          DATASEC (btf.name, parse_datasec_entry position ctx btf.children)
+      | "STRUCT" ->
+          let children =
+              List.map
+              (fun (child : btf_child) ->
+                (child.name, child.idx, parse_btf 0L ctx (attr_int child.attrs "type_id")))
+              btf.children
+          in
+          STRUCT (attr_int btf.attrs "size", attr_int btf.attrs "vlen", children)
       | _ -> if btf.name <> "" then OTHER btf.name else OTHER btf.kind)
 
 
-let resolve_load_reloc ctx reloc =
+let resolve_load_reloc ctx reloc imm =
   if reloc.reloc_typ = R_BPF_64_64 then
     match Hashtbl.find_opt ctx.symbols reloc.value with
     | Some symbol ->
+        let load_offset = Int64.add symbol.value imm in
         let ld =
           let section_idx = section_idx_of_symbol symbol in
           let section_name = section_name_of_idx ctx section_idx in
-          let symbol_value = symbol.value in
-          LOAD_DEST (section_name, symbol_value)
+          LOAD_DEST (section_name, load_offset)
         in
 
         let typ =
           match btf_of_btf_name_opt ctx symbol.name with
-          | Some btf -> [ TYP (parse_btf ctx btf.id) ]
+          | Some btf -> [ TYP (parse_btf load_offset ctx btf.id) ]
           | None -> [ TYP ELF ]
         in
 
@@ -335,9 +355,9 @@ let parse_info ctx (line : line) : line_info =
       match reloc_here ctx pc with
       | Some reloc -> (line, resolve_call_reloc ctx reloc imm :: [])
       | None -> (line, resolve_call_no_reloc ctx pc imm :: []))
-  | pc, WIDE (LD (DW, IMM), _, _, _, _, _) -> (
+  | pc, WIDE (LD (DW, IMM), _, _, _, _, imm) -> (
       match reloc_here ctx pc with
-      | Some reloc -> (line, resolve_load_reloc ctx reloc)
+      | Some reloc -> (line, resolve_load_reloc ctx reloc imm)
       | None -> (line, []))
   | _ -> (line, [])
 

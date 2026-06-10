@@ -122,12 +122,21 @@ let pp_instr fmt = function
 
 let pp_line fmt (n, instr) = fprintf fmt "%d : %a" n pp_instr instr
 
-let rec pp_typ fmt = function
-  | ARRAY (t, n) -> fprintf fmt "array(%a, l.%d)" pp_typ t n
+let rec pp_struct_member fmt = function
+  | name, _, typ -> fprintf fmt "%s:%a" name pp_typ typ
+
+and pp_datasec_entry fmt = function
+  | name, _, _, typ ->
+      fprintf fmt "%s:%a" name pp_typ typ
+
+and pp_typ fmt = function
+  | ARRAY (t, n) -> fprintf fmt "array_%d(%a)" n pp_typ t
   | PTR t -> fprintf fmt "ptr(%a)" pp_typ t
-  | INT size -> fprintf fmt "int(m.%d)" size
-  | STRUCT (s, l) -> fprintf fmt "struct(s.%d, v.%d)" s l
-  | DATASEC -> fprintf fmt "datasec"
+  | INT size -> fprintf fmt "int_%d" size
+  | STRUCT (_s, _l, members) ->
+      fprintf fmt "struct([%a])" (pp_lst_cma pp_struct_member) members
+  | DATASEC (name, entry) ->
+      fprintf fmt "datasec(%s,%a)" name pp_datasec_entry entry
   | OTHER s -> fprintf fmt "other(%s)" s
   | ELF -> fprintf fmt "elf"
 

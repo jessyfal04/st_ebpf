@@ -4,7 +4,7 @@ func [bind=GLOBAL, entry=false]
 0 : instr(STX(DW,MEM), dst=10, src=1, offset=-16, imm=0) ~ 
 8 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=1) ~ 
 16 : instr(STX(W,MEM), dst=10, src=1, offset=-20, imm=0) ~ 
-24 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.maps,32), typ(struct(s.24, v.4))
+24 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.maps,32), typ(struct([type:ptr(array_12(int_4)), max_entries:ptr(array_1(int_4)), key:ptr(int_4), values:array_0(ptr(struct([type:ptr(array_2(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_1(int_4))])))]))
 40 : instr(ALU64(X,MOV), dst=2, src=10, offset=0, imm=0) ~ 
 48 : instr(ALU64(K,ADD), dst=2, src=0, offset=0, imm=-20) ~ 
 56 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ call_bpf(map_lookup_elem)
@@ -25,7 +25,7 @@ func [bind=GLOBAL, entry=false]
 176 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=0) ~ 
 184 : instr(STX(W,MEM), dst=10, src=1, offset=-4, imm=0) ~ 
 192 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=12, imm=0) ~ goto_dest(296)
-200 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.maps,0), typ(struct(s.32, v.4))
+200 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.maps,0), typ(struct([type:ptr(array_2(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_1(int_4))]))
 216 : instr(ALU64(X,MOV), dst=2, src=10, offset=0, imm=0) ~ 
 224 : instr(ALU64(K,ADD), dst=2, src=0, offset=0, imm=-36) ~ 
 232 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=1) ~ call_bpf(map_lookup_elem)
