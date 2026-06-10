@@ -35,3 +35,41 @@ xdp_demo [bind=GLOBAL, entry=true]
 296 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ goto_dest(304)
 304 : instr(LDX(W,MEM), dst=0, src=10, offset=-4, imm=0) ~ 
 312 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ 
+
+--PSEUDO-CODE--
+
+xdp_demo [bind=GLOBAL, entry=true]
+0 : *(u64 *)(r10 - 16) = r1
+8 : r1 = &.bss <int_4>
+24 : r2 = *(u32 *)(r1 + 0)
+32 : r1 = &.data <int_4>
+48 : r1 = *(u32 *)(r1 + 0)
+56 : r2 += r1
+64 : r1 = &.bss + 4 <int_4>
+80 : r3 = *(u32 *)(r1 + 0)
+88 : r2 += r3
+96 : r2 += 2
+104 : *(u32 *)(r1 + 0) = r2
+112 : r2 = &.rodata.str1.1 <elf>
+128 : *(u64 *)(r10 - 24) = r2
+136 : r1 = *(u32 *)(r1 + 0)
+144 : if (u64)r1 != (u64)42 goto 232
+152 : goto 160
+160 : r3 = *(u64 *)(r10 - 24)
+168 : r1 = &.rodata + 4 <datasec(.rodata,xdp_demo.____fmt:array_9(int_1))>
+184 : r2 = 9
+192 : call trace_printk
+200 : *(u64 *)(r10 - 32) = r0
+208 : r1 = 0
+216 : *(u32 *)(r10 - 4) = r1
+224 : goto 304
+232 : r3 = *(u64 *)(r10 - 24)
+240 : r1 = &.rodata + 13 <datasec(.rodata,xdp_demo.____fmt.1:array_9(int_1))>
+256 : r2 = 9
+264 : call trace_printk
+272 : *(u64 *)(r10 - 40) = r0
+280 : r1 = 2
+288 : *(u32 *)(r10 - 4) = r1
+296 : goto 304
+304 : r0 = *(u32 *)(r10 - 4)
+312 : return

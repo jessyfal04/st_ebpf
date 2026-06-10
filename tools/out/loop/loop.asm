@@ -25,3 +25,31 @@ sum_15 [bind=GLOBAL, entry=true]
 176 : instr(STX(DW,MEM), dst=10, src=0, offset=-24, imm=0) ~ 
 184 : instr(ALU(K,MOV), dst=0, src=0, offset=0, imm=2) ~ 
 192 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ 
+
+--PSEUDO-CODE--
+
+sum_15 [bind=GLOBAL, entry=true]
+0 : *(u64 *)(r10 - 8) = r1
+8 : r1 = 0
+16 : *(u32 *)(r10 - 12) = r1
+24 : *(u32 *)(r10 - 16) = r1
+32 : goto 40
+40 : r1 = *(u32 *)(r10 - 16)
+48 : if (s64)r1 > (s64)14 goto 136
+56 : goto 64
+64 : r2 = *(u32 *)(r10 - 16)
+72 : r1 = *(u32 *)(r10 - 12)
+80 : r1 += r2
+88 : *(u32 *)(r10 - 12) = r1
+96 : goto 104
+104 : r1 = *(u32 *)(r10 - 16)
+112 : r1 += 1
+120 : *(u32 *)(r10 - 16) = r1
+128 : goto 40
+136 : r3 = *(u32 *)(r10 - 12)
+144 : r1 = &.rodata <datasec(.rodata,sum_15.____fmt:array_9(int_1))>
+160 : r2 = 9
+168 : call trace_printk
+176 : *(u64 *)(r10 - 24) = r0
+184 : r0 = 2
+192 : return

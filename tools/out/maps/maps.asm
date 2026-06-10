@@ -37,3 +37,43 @@ xdp_demo [bind=GLOBAL, entry=true]
 272 : instr(JMP(K,JA(OFFSET_JA)), dst=0, src=0, offset=0, imm=0) ~ goto_dest(280)
 280 : instr(LDX(W,MEM), dst=0, src=10, offset=-4, imm=0) ~ 
 288 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ 
+
+--PSEUDO-CODE--
+
+xdp_demo [bind=GLOBAL, entry=true]
+0 : *(u64 *)(r10 - 16) = r1
+8 : r1 = 0
+16 : *(u32 *)(r10 - 56) = r1
+24 : *(u32 *)(r10 - 20) = r1
+32 : r1 = 42
+40 : *(u32 *)(r10 - 24) = r1
+48 : r1 = &.maps <struct([type:ptr(array_1(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_1(int_4))])>
+64 : *(u64 *)(r10 - 48) = r1
+72 : r2 = r10
+80 : r2 += -20
+88 : r3 = r10
+96 : r3 += -24
+104 : r4 = 0
+112 : call map_update_elem
+120 : r2 = *(u32 *)(r10 - 56)
+128 : r1 = *(u64 *)(r10 - 48)
+136 : *(u32 *)(r10 - 28) = r2
+144 : r2 = r10
+152 : r2 += -28
+160 : call map_lookup_elem
+168 : *(u64 *)(r10 - 40) = r0
+176 : r1 = *(u64 *)(r10 - 40)
+184 : if (u32)r1 == (u32)0 goto 232
+192 : goto 200
+200 : r1 = *(u64 *)(r10 - 40)
+208 : r1 = *(u32 *)(r1 + 0)
+216 : if (u64)r1 == (u64)42 goto 256
+224 : goto 232
+232 : r1 = 0
+240 : *(u32 *)(r10 - 4) = r1
+248 : goto 280
+256 : r1 = 2
+264 : *(u32 *)(r10 - 4) = r1
+272 : goto 280
+280 : r0 = *(u32 *)(r10 - 4)
+288 : return

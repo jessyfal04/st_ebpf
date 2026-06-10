@@ -74,10 +74,16 @@ let () =
     extract_functions texts_infos ctx
   in
 
+  let print_section title printer =
+    print_endline title;
+    List.iter
+      (fun fonction ->
+        print_endline "";
+        Format.printf "%a@." printer fonction)
+      fonctions
+  in
+
   (* Affichage ! *)
-  print_endline "--FONCTIONS--";
-  List.iter
-    (fun fonction ->
-      print_endline "";
-      Format.printf "%a@." Pp.pp_fonction fonction)
-    fonctions
+  print_section "--FONCTIONS--" Pp.pp_fonction;
+  print_endline "";
+  print_section "--PSEUDO-CODE--" Pp_pseudo.pp_fonction

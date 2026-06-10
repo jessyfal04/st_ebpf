@@ -15,3 +15,21 @@ xdp_demo [bind=GLOBAL, entry=true]
 112 : instr(STX(DW,MEM), dst=10, src=0, offset=-32, imm=0) ~ 
 120 : instr(ALU(K,MOV), dst=0, src=0, offset=0, imm=2) ~ 
 128 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ 
+
+--PSEUDO-CODE--
+
+xdp_demo [bind=GLOBAL, entry=true]
+0 : *(u64 *)(r10 - 8) = r1
+8 : r1 = &.rodata.str1.1 <elf>
+24 : *(u64 *)(r10 - 16) = r1
+32 : r3 = *(u64 *)(r10 - 16)
+40 : r1 = &.rodata <datasec(.rodata,xdp_demo.____fmt:array_3(int_1))>
+56 : r2 = 3
+64 : call trace_printk
+72 : *(u64 *)(r10 - 24) = r0
+80 : r1 = &.rodata + 3 <datasec(.rodata,xdp_demo.____fmt.1:array_25(int_1))>
+96 : r2 = 25
+104 : call trace_printk
+112 : *(u64 *)(r10 - 32) = r0
+120 : r0 = 2
+128 : return

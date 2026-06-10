@@ -10,3 +10,16 @@ xdp_demo [bind=GLOBAL, entry=true]
 48 : instr(LDX(W,MEM), dst=1, src=10, offset=-16, imm=0) ~ 
 56 : instr(ALU(X,ADD), dst=0, src=1, offset=0, imm=0) ~ 
 64 : instr(JMP(K,EXIT), dst=0, src=0, offset=0, imm=0) ~ 
+
+--PSEUDO-CODE--
+
+xdp_demo [bind=GLOBAL, entry=true]
+0 : *(u64 *)(r10 - 8) = r1
+8 : r1 = 1
+16 : *(u32 *)(r10 - 12) = r1
+24 : r1 = 2
+32 : *(u32 *)(r10 - 16) = r1
+40 : r0 = *(u32 *)(r10 - 12)
+48 : r1 = *(u32 *)(r10 - 16)
+56 : r0 += r1
+64 : return
