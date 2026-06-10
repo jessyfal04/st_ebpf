@@ -1,9 +1,11 @@
-ID	KIND	NAME	ATTRS
-1	FUNC_PROTO	(anon)	ret_type_id=2 vlen=1
-2	INT	int	size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
-3	PTR	(anon)	type_id=4
-4	STRUCT	test_md	size=16 vlen=2
-5	PTR	(anon)	type_id=6
-6	TYPEDEF	uint8_t	type_id=7
-7	INT	unsigned char	size=1 bits_offset=0 nr_bits=8 encoding=(none)
-8	FUNC	foo	type_id=1 linkage=global
+ID	PARENT_ID	IDX	KIND	NAME	ATTRS
+1	-1	-1	FUNC_PROTO	(anon)	ret_type_id=2 vlen=1
+2	-1	-1	INT	int	size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+3	-1	-1	PTR	(anon)	type_id=4
+4	-1	-1	STRUCT	test_md	size=16 vlen=2
+-1	4	0	MEMBER	data_start	type_id=5 bits_offset=0
+-1	4	1	MEMBER	data_end	type_id=5 bits_offset=64
+5	-1	-1	PTR	(anon)	type_id=6
+6	-1	-1	TYPEDEF	uint8_t	type_id=7
+7	-1	-1	INT	unsigned char	size=1 bits_offset=0 nr_bits=8 encoding=(none)
+8	-1	-1	FUNC	foo	type_id=1 linkage=global

@@ -98,7 +98,7 @@ bpftool btf dump file "$obj" format raw |
 awk '
 BEGIN {
     OFS = "\t"
-    print "ID", "KIND", "NAME", "ATTRS"
+    print "ID", "PARENT_ID", "IDX", "KIND", "NAME", "ATTRS"
 }
 
 function trim(s) {
@@ -108,14 +108,29 @@ function trim(s) {
 }
 
 function qname(s,    q) {
-    q = sprintf("%c", 39) # single quote
+    q = sprintf("%c", 39)
     if (match(s, q "[^" q "]*" q))
         return substr(s, RSTART + 1, RLENGTH - 2)
     return ""
 }
 
-# Top-level BTF entry:
-# [4] FUNC '\''xdp_demo'\'' type_id=1 linkage=global
+function emit_struct_child(parent_id, idx, raw,    name, attrs, q) {
+    name = qname(raw)
+    attrs = raw
+    q = sprintf("%c", 39)
+    sub("^[[:space:]]*" q "[^" q "]+" q "[[:space:]]+", "", attrs)
+    print -1, parent_id, idx, "MEMBER", name, trim(attrs)
+}
+
+function emit_datasec_child(parent_id, idx, raw,    attrs, name, q) {
+    attrs = raw
+    name = qname(raw)
+    sub(/^[[:space:]]+/, "", attrs)
+    q = sprintf("%c", 39)
+    sub("[[:space:]]*\\(VAR[[:space:]]+" q "[^" q "]+" q "\\)$", "", attrs)
+    print -1, parent_id, idx, "DATASEC_ENTRY", name, trim(attrs)
+}
+
 /^\[[0-9]+\]/ {
     raw = $0
 
@@ -139,9 +154,20 @@ function qname(s,    q) {
 
     cur_id = id
     cur_kind = kind
+    child_idx = 0
 
-    print id, kind, name, trim(attrs)
+    print id, -1, -1, kind, name, trim(attrs)
     next
 }
 
+/^[[:space:]]+/ {
+    if (cur_kind == "STRUCT") {
+        emit_struct_child(cur_id, child_idx, $0)
+        child_idx++
+    } else if (cur_kind == "DATASEC") {
+        emit_datasec_child(cur_id, child_idx, $0)
+        child_idx++
+    }
+    next
+}
 ' > "out/$basename/tsv/btf.tsv"

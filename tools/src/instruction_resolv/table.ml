@@ -12,11 +12,18 @@ type symbol = {
 }
 
 type attr = string * string
+type btf_child = {
+  idx : int;
+  kind : string;
+  name : string;
+  attrs : attr list;
+}
 type btf = {
   id : int;
   kind : string;
   name : string;
   attrs : attr list;
+  children : btf_child list;
 }
 
 type reloc = { offset : int64; reloc_typ : reloc_type; value : string }
@@ -57,13 +64,13 @@ let parse_symbol_ndx ndx =
   | Some idx -> SECTION_NDX idx
   | None -> OTHER_NDX ndx
 
-let load_tsv ic ~create ~parse_row ~add =
+let load_tsv ic ~parse_row ~add =
   let rec read tbl =
     let row = parse_row (input_line ic |> String.split_on_char '\t') in
     add tbl row;
     read tbl
   in
-  let tbl = create () in
+  let tbl = Hashtbl.create 16 in
   try
     ignore (input_line ic);
     read tbl
@@ -76,8 +83,8 @@ let load_sections ic : section_table =
         { idx; name; size = parse_hex_int size; typ = kind }
     | _ -> failwith "Invalid load_sections"
   in
-  let add tbl section = Hashtbl.replace tbl section.idx section in
-  load_tsv ic ~create:(fun () -> Hashtbl.create 16) ~parse_row ~add
+  let add (tbl : section_table) (section : section) = Hashtbl.replace tbl section.idx section in
+  load_tsv ic ~parse_row ~add
 
 let load_symbols ic : symbol_table =
   let parse_row = function
@@ -92,8 +99,8 @@ let load_symbols ic : symbol_table =
         }
     | _ -> failwith "Invalid load_symbols"
   in
-  let add tbl (symbol : symbol) = Hashtbl.replace tbl symbol.name symbol in
-  load_tsv ic ~create:(fun () -> Hashtbl.create 16) ~parse_row ~add
+  let add (tbl : symbol_table) (symbol : symbol) = Hashtbl.replace tbl symbol.name symbol in
+  load_tsv ic ~parse_row ~add
 
 let load_relocs ic : reloc_table =
   let parse_row = function
@@ -105,20 +112,30 @@ let load_relocs ic : reloc_table =
         }
     | _ -> failwith "Invalid load_relocs"
   in
-  let add tbl reloc = Hashtbl.replace tbl reloc.offset reloc in
-  load_tsv ic ~create:(fun () -> Hashtbl.create 16) ~parse_row ~add
+  let add (tbl : reloc_table) (reloc : reloc) = Hashtbl.replace tbl reloc.offset reloc in
+  load_tsv ic ~parse_row ~add
 
 let load_btf ic : btf_table =
   let parse_row = function
-    | id :: kind :: name :: attrs ->
+    | id :: parent_id :: idx :: kind :: name :: attrs ->
         let id = int_of_string id in
-        let attrs = parse_attrs attrs
-        in
-        { id; kind; name; attrs }
+        let parent_id = int_of_string parent_id in
+        let idx = int_of_string idx in
+        let attrs = parse_attrs attrs in
+        (id, parent_id, idx, kind, name, attrs)
     | _ -> failwith "Invalid load_btf"
   in
-  let add tbl btf = Hashtbl.replace tbl btf.id btf in
-  load_tsv ic ~create:(fun () -> Hashtbl.create 16) ~parse_row ~add
+  let add (tbl : btf_table) (id, parent_id, idx, kind, name, attrs) =
+    if parent_id = -1 then
+      Hashtbl.replace tbl id { id; kind; name; attrs; children = [] }
+    else
+      match Hashtbl.find_opt tbl parent_id with
+      | Some entry ->
+          let child = { idx; kind; name; attrs } in
+          Hashtbl.replace tbl parent_id { entry with children = entry.children @ [ child ] }
+      | None -> failwith "Invalid load_btf (missing parent)"
+  in
+  load_tsv ic ~parse_row ~add
 
 (* Helpers *)
 let reloc_here ctx pc : reloc option =

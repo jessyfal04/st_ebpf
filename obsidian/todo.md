@@ -1,5 +1,8 @@
 # Next
 - Analysiser les bts enfant (datasec et struct)
+	- ~~Extraction~~
+	- ~~Import dans table.ml~~
+	- Modifier le type parsing de DATASEC et de STRUCT en prenant en compte les enfants dans parse_btf
 - Récupérer de la /data intéressante
 	- représenter en région avec offset
 	- calculer lors des load de sections le vrai symbol chargé depuis DATASEC
@@ -10,8 +13,6 @@
 - Lire le git d'Erwan pour apprendre eBPF!
 
 # Questions
-- Dans MOPSA comment sont gérés les GOTO?
-- On a besoin de garder en mémoire call_dest(odd,**N**) le N de call_dest?
 
 # Later
 - Lire thèse qui explique MOPSA
