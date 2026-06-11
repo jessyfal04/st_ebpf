@@ -30,11 +30,6 @@ let signed_suffix_int32 imm =
   if imm < 0l then Printf.sprintf " - %ld" (Int32.neg imm)
   else Printf.sprintf " + %ld" imm
 
-let pp_offset64 offset =
-  if offset = 0L then ""
-  else if offset < 0L then Printf.sprintf " - %Ld" (Int64.neg offset)
-  else Printf.sprintf " + %Ld" offset
-
 let source_operand source src_reg imm =
   match source with
   | K -> Int32.to_string imm
@@ -48,26 +43,22 @@ let atomic_name = function
   | XCHG -> "atomic_xchg"
   | CMPXCHG -> "atomic_cmpxchg"
 
-let rec find_info f = function
-  | [] -> None
-  | x :: xs -> (
-      match f x with
-      | Some v -> Some v
-      | None -> find_info f xs)
+let call_dest = function
+  | Some (CALL_DEST (name, target)) -> Some (name, target)
+  | _ -> None
 
-let call_dest infos =
-  find_info (function CALL_DEST (name, target) -> Some (name, target) | _ -> None) infos
+let call_name = function
+  | Some (CALL_DEST (name, _)) -> Some name
+  | Some (BPF_FUNC name) -> Some name
+  | _ -> None
 
-let call_name infos =
-  match call_dest infos with
-  | Some (name, _) -> Some name
-  | None ->
-      find_info (function BPF_FUNC name -> Some name | _ -> None) infos
+let goto_dest = function
+  | Some (GOTO_DEST line) -> Some line
+  | _ -> None
 
-let goto_dest infos = find_info (function GOTO_DEST line -> Some line | _ -> None) infos
-
-let load_dest infos =
-  find_info (function LOAD_DEST (target, offset) -> Some (target, offset) | _ -> None) infos
+let load_typ = function
+  | Some (LOAD_TYP load_typ) -> Some load_typ
+  | _ -> None
 
 let rec pp_struct_member fmt = function
   | name, _, typ -> fprintf fmt "%s:%a" name pp_typ typ
@@ -81,20 +72,11 @@ and pp_typ fmt = function
   | INT size -> fprintf fmt "int_%d" size
   | STRUCT (_s, _l, members) ->
       fprintf fmt "struct([%a])" (pp_lst_cma pp_struct_member) members
-  | DATASEC (name, entry) ->
-      fprintf fmt "datasec(%s,%a)" name pp_datasec_entry entry
   | OTHER s -> fprintf fmt "other(%s)" s
   | ELF -> fprintf fmt "elf"
 
-let type_suffix infos =
-  let rec aux acc = function
-    | [] -> List.rev acc
-    | TYP typ :: rest -> aux (Printf.sprintf "<%s>" (Format.asprintf "%a" pp_typ typ) :: acc) rest
-    | _ :: rest -> aux acc rest
-  in
-  match aux [] infos with
-  | [] -> ""
-  | ts -> " " ^ String.concat " " ts
+let pp_load_typ fmt { region; offset; typ } =
+  fprintf fmt "load_typ(%s+%Ld, typ=%a)" region offset pp_typ typ
 
 let pp_mem_addr reg offset =
   Printf.sprintf "%s%s" (reg_name reg) (signed_suffix_int offset)
@@ -153,31 +135,31 @@ let pp_alu width source op dst src imm =
       in
       Printf.sprintf "%s = %s%d(%s)" dst name bits dst
 
-let pp_jump_target infos fallback =
-  match goto_dest infos with
+let pp_jump_target info fallback =
+  match goto_dest info with
   | Some line -> Printf.sprintf "goto %d" line
   | None -> fallback
 
-let pp_jump infos width source code dst src offset imm =
+let pp_jump info width source code dst src offset imm =
   let signed_cast = if width then "(s64)" else "(s32)" in
   let unsigned_cast = if width then "(u64)" else "(u32)" in
   let operand = source_operand source src imm in
-  let rel_target = pp_jump_target infos (Printf.sprintf "goto %+d" offset) in
+  let rel_target = pp_jump_target info (Printf.sprintf "goto %+d" offset) in
   match code with
   | JA OFFSET_JA -> rel_target
   | JA IMM_JA ->
-      pp_jump_target infos (Printf.sprintf "goto %s" (Int32.to_string imm))
+      pp_jump_target info (Printf.sprintf "goto %s" (Int32.to_string imm))
   | CALL STATIC_ID -> (
-      match call_name infos with
+      match call_name info with
       | Some name -> Printf.sprintf "call %s" name
       | None -> Printf.sprintf "call %s" (Int32.to_string imm))
   | CALL CALL_IMM -> (
-      match call_dest infos with
+      match call_dest info with
       | Some (name, target) when target >= 0L ->
           Printf.sprintf "call %s @%Ld" name target
       | Some (name, _) -> Printf.sprintf "call %s" name
       | None -> (
-          match call_name infos with
+          match call_name info with
           | Some name -> Printf.sprintf "call %s" name
           | None -> Printf.sprintf "call %s" (Int32.to_string imm)))
   | CALL BTF_ID -> Printf.sprintf "call btf[%s]" (Int32.to_string imm)
@@ -216,11 +198,10 @@ let pp_jump infos width source code dst src offset imm =
       Printf.sprintf "if %s%s <= %s%s %s" signed_cast (reg_name dst)
         signed_cast operand rel_target
 
-let pp_wide infos wide_type dst imm64 =
-  let types = type_suffix infos in
+let pp_wide info wide_type dst imm64 =
   let base =
-    match load_dest infos with
-    | Some (target, offset) -> Printf.sprintf "&%s%s" target (pp_offset64 offset)
+    match load_typ info with
+    | Some load_typ -> Format.asprintf "%a" pp_load_typ load_typ
     | None ->
         match wide_type with
         | INTEGER -> Int64.to_string imm64
@@ -231,9 +212,9 @@ let pp_wide infos wide_type dst imm64 =
         | MAP_BY_IDX -> Printf.sprintf "map_by_idx(%Ld)" imm64
         | MAP_VAL_IDX -> Printf.sprintf "map_val(map_by_idx(%Ld))" imm64
   in
-  Printf.sprintf "%s = %s%s" (reg_name dst) base types
+  Printf.sprintf "%s = %s" (reg_name dst) base
 
-let pp_instr infos = function
+let pp_instr info = function
   | BASIC (opcode, dst_reg, src_reg, offset, imm) -> (
       match opcode with
       | LD (size, mode) -> (
@@ -289,21 +270,21 @@ let pp_instr infos = function
               Printf.sprintf "*(%s *)(%s) = %s" (size_name size)
                 (pp_packet_indirect src_reg imm) (reg_name src_reg))
       | ALU (source, op) -> pp_alu false source op dst_reg src_reg imm
-      | JMP (source, code) -> pp_jump infos false source code dst_reg src_reg offset imm
+      | JMP (source, code) -> pp_jump info false source code dst_reg src_reg offset imm
       | JMP32 (source, code) ->
-          pp_jump infos true source code dst_reg src_reg offset imm
+          pp_jump info true source code dst_reg src_reg offset imm
       | ALU64 (source, op) -> pp_alu true source op dst_reg src_reg imm)
   | WIDE (opcode, wide_type, dst_reg, _src_reg, _offset, imm64) -> (
       match opcode with
-      | LD (DW, IMM) -> pp_wide infos wide_type dst_reg imm64
+      | LD (DW, IMM) -> pp_wide info wide_type dst_reg imm64
       | _ -> failwith "Invalid WIDE instruction in pretty printer")
 
-let pp_lineInfo fmt ((line, instr), infos) =
-  fprintf fmt "%d : %s" line (pp_instr infos instr)
+let pp_line_info fmt ((line, instr), info) =
+  fprintf fmt "%d : %s" line (pp_instr info instr)
 
-let pp_lineInfos fmt li =
-  pp_lst_brk pp_lineInfo fmt li
+let pp_line_infos fmt li =
+  pp_lst_brk pp_line_info fmt li
 
 let pp_fonction fmt (fonction : fonction) =
   fprintf fmt "%s [bind=%s, entry=%b]@.%a" fonction.name fonction.bind
-    fonction.is_entry pp_lineInfos fonction.code
+    fonction.is_entry pp_line_infos fonction.code

@@ -27,16 +27,25 @@ type btf = {
 }
 
 type reloc = { offset : int64; reloc_typ : reloc_type; value : string }
+type data_kind = INIT_DATA | ZERO_BSS | RODATA
+type data_region = {
+  section_name : string;
+  bytes : bytes;
+  size : int;
+  kind : data_kind;
+}
 type section_table = (int, section) Hashtbl.t
 type symbol_table = (string, symbol) Hashtbl.t
 type reloc_table = (int64, reloc) Hashtbl.t
 type btf_table = (int, btf) Hashtbl.t
+type data_region_table = (string, data_region) Hashtbl.t
 type context = {
   basename : string;
   symbols : symbol_table;
   sections : section_table;
   btf : btf_table;
   relocs : reloc_table option;
+  data_regions : data_region_table;
 }
 
 let parse_hex_int s = Int64.of_string ("0x" ^ s)
@@ -114,6 +123,39 @@ let load_relocs ic : reloc_table =
   in
   let add (tbl : reloc_table) (reloc : reloc) = Hashtbl.replace tbl reloc.offset reloc in
   load_tsv ic ~parse_row ~add
+
+let read_bytes path =
+  let ic = open_in_bin path in
+  Fun.protect ~finally:(fun () -> close_in_noerr ic) (fun () ->
+      Bytes.of_string (really_input_string ic (in_channel_length ic)))
+
+let data_kind_of_section_name section_name =
+  match section_name with
+  | ".data" | ".maps" | "license" -> INIT_DATA
+  | ".bss" -> ZERO_BSS
+  | s when String.starts_with ~prefix:".rodata" s -> RODATA
+  | _ -> failwith "Invalid data_kind"
+
+let load_data_regions dir sections : data_region_table =
+  let load_region (section : section) =
+    let kind = data_kind_of_section_name section.name in
+    let size = Int64.to_int section.size in
+    let bytes =
+      match kind with
+      | ZERO_BSS -> Bytes.make size '\000'
+      | INIT_DATA | RODATA -> read_bytes (dir ^ "/data/" ^ section.name ^ ".bin")
+    in
+    (section.name, { section_name = section.name; bytes; size; kind })
+  in
+  Hashtbl.fold
+    (fun _idx (section : section) tbl ->
+      match section.typ with
+      | "DATA" | "BSS" ->
+          let section_name, region = load_region section in
+          Hashtbl.replace tbl section_name region;
+          tbl
+      | _ -> tbl)
+    sections (Hashtbl.create 16)
 
 let load_btf ic : btf_table =
   let parse_row = function

@@ -2,10 +2,10 @@
 #include <bpf/bpf_helpers.h>
 
 struct {
-	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(type, BPF_MAP_TYPE_STACK);
 	__type(key, __u32);
 	__type(value, __u32);
-	__uint(max_entries, 1);
+	__uint(max_entries, 2);
 } map SEC(".maps");
 
 SEC("xdp")

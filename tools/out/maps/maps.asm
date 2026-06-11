@@ -1,3 +1,7 @@
+--DATA REGIONS--
+.maps            size=32   init
+license          size=4    init
+
 --FONCTIONS--
 
 xdp_demo [bind=GLOBAL, entry=true]
@@ -7,7 +11,7 @@ xdp_demo [bind=GLOBAL, entry=true]
 24 : instr(STX(W,MEM), dst=10, src=1, offset=-20, imm=0) ~ 
 32 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=42) ~ 
 40 : instr(STX(W,MEM), dst=10, src=1, offset=-24, imm=0) ~ 
-48 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.maps,0), typ(struct([type:ptr(array_1(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_1(int_4))]))
+48 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_typ(.maps+0, typ=struct([type:ptr(array_23(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_2(int_4))]))
 64 : instr(STX(DW,MEM), dst=10, src=1, offset=-48, imm=0) ~ 
 72 : instr(ALU64(X,MOV), dst=2, src=10, offset=0, imm=0) ~ 
 80 : instr(ALU64(K,ADD), dst=2, src=0, offset=0, imm=-20) ~ 
@@ -47,7 +51,7 @@ xdp_demo [bind=GLOBAL, entry=true]
 24 : *(u32 *)(r10 - 20) = r1
 32 : r1 = 42
 40 : *(u32 *)(r10 - 24) = r1
-48 : r1 = &.maps <struct([type:ptr(array_1(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_1(int_4))])>
+48 : r1 = load_typ(.maps+0, typ=struct([type:ptr(array_23(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_2(int_4))]))
 64 : *(u64 *)(r10 - 48) = r1
 72 : r2 = r10
 80 : r2 += -20

@@ -1,3 +1,6 @@
+--DATA REGIONS--
+
+
 --FONCTIONS--
 
 foo [bind=GLOBAL, entry=true]

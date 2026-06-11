@@ -224,18 +224,22 @@ type typ =
 | STRUCT of int * int * struct_member list
 | OTHER of string
 | ELF
-| DATASEC of string * datasec_entry
 and struct_member = string * int * typ
 and datasec_entry = string * int * int * typ
+
+type load_typ = {
+  region : string;
+  offset : int64;
+  typ : typ;
+}
 
 type info =
 | BPF_FUNC of string 
 | CALL_DEST of string * int64 
-| LOAD_DEST of string * int64 
 | GOTO_DEST of int
-| TYP of typ
+| LOAD_TYP of load_typ
 
-type line_info = line * info list
+type line_info = line * info option
 
 let resolve_call_bpf_func imm =
   let id = Int32.to_int imm in
@@ -280,14 +284,13 @@ let attr_int attrs key =
 let rec parse_datasec_entry position ctx children =
   match
     List.find_opt
-      (fun (child : btf_child) -> Int64.of_int (attr_int child.attrs "offset") = position)
+      (fun (child : btf_child) ->
+        let offset = Int64.of_int (attr_int child.attrs "offset") in
+        let size = Int64.of_int (attr_int child.attrs "size") in
+        position >= offset && position < Int64.add offset size)
       children
   with
-  | Some child ->
-      ( child.name,
-        attr_int child.attrs "offset",
-        attr_int child.attrs "size",
-        parse_btf 0L ctx (attr_int child.attrs "type_id") )
+  | Some child -> parse_btf 0L ctx (attr_int child.attrs "type_id")
   | None -> failwith "Invalid DATASEC entry"
 
 and parse_btf position ctx btf_id =
@@ -299,8 +302,7 @@ and parse_btf position ctx btf_id =
       | "ARRAY" -> ARRAY (parse_btf 0L ctx (attr_int btf.attrs "type_id"), attr_int btf.attrs "nr_elems")
       | "PTR" -> PTR (parse_btf 0L ctx (attr_int btf.attrs "type_id"))
       | "VAR" | "TYPEDEF" | "CONST" -> parse_btf 0L ctx (attr_int btf.attrs "type_id")
-      | "DATASEC" ->
-          DATASEC (btf.name, parse_datasec_entry position ctx btf.children)
+      | "DATASEC" -> parse_datasec_entry position ctx btf.children
       | "STRUCT" ->
           let children =
               List.map
@@ -317,19 +319,14 @@ let resolve_load_reloc ctx reloc imm =
     match Hashtbl.find_opt ctx.symbols reloc.value with
     | Some symbol ->
         let load_offset = Int64.add symbol.value imm in
-        let ld =
-          let section_idx = section_idx_of_symbol symbol in
-          let section_name = section_name_of_idx ctx section_idx in
-          LOAD_DEST (section_name, load_offset)
-        in
-
+        let section_idx = section_idx_of_symbol symbol in
+        let section_name = section_name_of_idx ctx section_idx in
         let typ =
           match btf_of_btf_name_opt ctx symbol.name with
-          | Some btf -> [ TYP (parse_btf load_offset ctx btf.id) ]
-          | None -> [ TYP ELF ]
+          | Some btf -> parse_btf load_offset ctx btf.id
+          | None -> ELF
         in
-
-        ld :: typ
+        LOAD_TYP { region = section_name; offset = load_offset; typ }
     | None -> failwith "Invalid resolve_load_reloc (symbol)"
   else failwith "Invalid resolve_load_reloc (reloc_typ)"
 
@@ -342,24 +339,24 @@ let resolve_goto_imm pc imm =
 let parse_info ctx (line : line) : line_info =
   match line with
   | pc, BASIC (JMP (_, JA OFFSET_JA), _, _, offset, _) ->
-      (line, resolve_goto_offset pc offset :: [])
+      (line, Some (resolve_goto_offset pc offset))
   | pc, BASIC (JMP32 (_, JA IMM_JA), _, _, _, imm) ->
-      (line, resolve_goto_imm pc imm :: [])
+      (line, Some (resolve_goto_imm pc imm))
   | pc, BASIC (JMP (_, jmp), _, _, offset, _) when is_cond_jump jmp ->
-      (line, resolve_goto_offset pc offset :: [])
+      (line, Some (resolve_goto_offset pc offset))
   | pc, BASIC (JMP32 (_, jmp), _, _, offset, _) when is_cond_jump jmp ->
-      (line, resolve_goto_offset pc offset :: [])
+      (line, Some (resolve_goto_offset pc offset))
   | _, BASIC (JMP (K, CALL STATIC_ID), _, _, _, imm) ->
-      (line, resolve_call_bpf_func imm :: [])
+      (line, Some (resolve_call_bpf_func imm))
   | pc, BASIC (JMP (K, CALL CALL_IMM), _, _, _, imm) -> (
       match reloc_here ctx pc with
-      | Some reloc -> (line, resolve_call_reloc ctx reloc imm :: [])
-      | None -> (line, resolve_call_no_reloc ctx pc imm :: []))
+      | Some reloc -> (line, Some (resolve_call_reloc ctx reloc imm))
+      | None -> (line, Some (resolve_call_no_reloc ctx pc imm)))
   | pc, WIDE (LD (DW, IMM), _, _, _, _, imm) -> (
       match reloc_here ctx pc with
-      | Some reloc -> (line, resolve_load_reloc ctx reloc imm)
-      | None -> (line, []))
-  | _ -> (line, [])
+      | Some reloc -> (line, Some (resolve_load_reloc ctx reloc imm))
+      | None -> (line, None))
+  | _ -> (line, None)
 
 let parse_infos ctx (lines : line list) : line_info list =
   List.map (parse_info ctx) lines

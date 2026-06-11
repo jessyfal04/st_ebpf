@@ -45,6 +45,7 @@ let () =
   let symb_table = auto_in_file (dir ^ "/tsv/symb.tsv") load_symbols in
   let section_table = auto_in_file (dir ^ "/tsv/sections.tsv") load_sections in
   let btf_table = auto_in_file (dir ^ "/tsv/btf.tsv") load_btf in
+  let data_region_table = load_data_regions dir section_table in
 
   let ctx =
     {
@@ -53,6 +54,7 @@ let () =
       sections = section_table;
       btf = btf_table;
       relocs = None;
+      data_regions = data_region_table;
     }
   in
 
@@ -74,7 +76,7 @@ let () =
     extract_functions texts_infos ctx
   in
 
-  let print_section title printer =
+  let print_fonctions title printer =
     print_endline title;
     List.iter
       (fun fonction ->
@@ -84,6 +86,9 @@ let () =
   in
 
   (* Affichage ! *)
-  print_section "--FONCTIONS--" Pp.pp_fonction;
+  print_endline "--DATA REGIONS--";
+  Format.printf "%a@." Pp.pp_data_regions ctx;
   print_endline "";
-  print_section "--PSEUDO-CODE--" Pp_pseudo.pp_fonction
+  print_fonctions "--FONCTIONS--" Pp.pp_fonction;
+  print_endline "";
+  print_fonctions "--PSEUDO-CODE--" Pp_pseudo.pp_fonction

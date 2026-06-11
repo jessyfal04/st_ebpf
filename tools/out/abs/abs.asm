@@ -1,3 +1,6 @@
+--DATA REGIONS--
+license          size=4    init
+
 --FONCTIONS--
 
 xdp_demo [bind=GLOBAL, entry=true]

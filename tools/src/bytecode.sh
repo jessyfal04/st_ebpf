@@ -66,10 +66,9 @@ awk '$5 == "DATA" && $3 != "00000000" { print $2 }' |
 
 while read -r section; do
     safe_section=${section//\//_}
-    name="${basename}_${safe_section}"
 
-    llvm-objcopy --dump-section "$section=out/$basename/data/${name}.bin" "$obj" /dev/null
-    od --address-radix n --format c --output-duplicates  "out/$basename/data/${name}.bin" > "out/$basename/data/${name}.txt"
+    llvm-objcopy --dump-section "$section=out/$basename/data/${safe_section}.bin" "$obj" /dev/null
+    od --address-radix n --format c --output-duplicates  "out/$basename/data/${safe_section}.bin" > "out/$basename/data/${safe_section}.txt"
     
     echo "Section $name extraite."
 done

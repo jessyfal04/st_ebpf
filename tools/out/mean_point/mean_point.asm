@@ -1,3 +1,8 @@
+--DATA REGIONS--
+.data            size=8    init
+.rodata          size=18   rodata
+license          size=4    init
+
 --FONCTIONS--
 
 xdp_demo [bind=GLOBAL, entry=true]
@@ -6,7 +11,7 @@ xdp_demo [bind=GLOBAL, entry=true]
 16 : instr(STX(W,MEM), dst=10, src=1, offset=-16, imm=0) ~ 
 24 : instr(ALU(K,MOV), dst=1, src=0, offset=0, imm=50) ~ 
 32 : instr(STX(W,MEM), dst=10, src=1, offset=-12, imm=0) ~ 
-40 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.data,0), typ(struct([x:int_4, y:int_4]))
+40 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_typ(.data+0, typ=struct([x:int_4, y:int_4]))
 56 : instr(LDX(W,MEM), dst=2, src=1, offset=0, imm=0) ~ 
 64 : instr(LDX(W,MEM), dst=3, src=10, offset=-16, imm=0) ~ 
 72 : instr(ALU(X,ADD), dst=2, src=3, offset=0, imm=0) ~ 
@@ -25,7 +30,7 @@ xdp_demo [bind=GLOBAL, entry=true]
 176 : instr(STX(W,MEM), dst=10, src=1, offset=-24, imm=0) ~ 
 184 : instr(LDX(W,MEM), dst=3, src=10, offset=-20, imm=0) ~ 
 192 : instr(LDX(W,MEM), dst=4, src=10, offset=-24, imm=0) ~ 
-200 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_dest(.rodata,0), typ(datasec(.rodata,xdp_demo.____fmt:array_18(int_1)))
+200 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_typ(.rodata+0, typ=array_18(int_1))
 216 : instr(ALU(K,MOV), dst=2, src=0, offset=0, imm=18) ~ 
 224 : instr(JMP(K,CALL(STATIC_ID)), dst=0, src=0, offset=0, imm=6) ~ call_bpf(trace_printk)
 232 : instr(STX(DW,MEM), dst=10, src=0, offset=-32, imm=0) ~ 
@@ -40,7 +45,7 @@ xdp_demo [bind=GLOBAL, entry=true]
 16 : *(u32 *)(r10 - 16) = r1
 24 : r1 = 50
 32 : *(u32 *)(r10 - 12) = r1
-40 : r1 = &.data <struct([x:int_4, y:int_4])>
+40 : r1 = load_typ(.data+0, typ=struct([x:int_4, y:int_4]))
 56 : r2 = *(u32 *)(r1 + 0)
 64 : r3 = *(u32 *)(r10 - 16)
 72 : r2 += r3
@@ -59,7 +64,7 @@ xdp_demo [bind=GLOBAL, entry=true]
 176 : *(u32 *)(r10 - 24) = r1
 184 : r3 = *(u32 *)(r10 - 20)
 192 : r4 = *(u32 *)(r10 - 24)
-200 : r1 = &.rodata <datasec(.rodata,xdp_demo.____fmt:array_18(int_1))>
+200 : r1 = load_typ(.rodata+0, typ=array_18(int_1))
 216 : r2 = 18
 224 : call trace_printk
 232 : *(u64 *)(r10 - 32) = r0

@@ -72,11 +72,6 @@ let pp_call_from fmt = function
   | CALL_IMM -> fprintf fmt "CALL_IMM"
   | BTF_ID -> fprintf fmt "BTF_ID"
 
-let pp_reloc_type fmt = function
-  | R_BPF_64_64 -> fprintf fmt "R_BPF_64_64"
-  | R_BPF_64_32 -> fprintf fmt "R_BPF_64_32"
-  | OTHER_RELOC s -> fprintf fmt "%s" s
-
 let pp_code_jmp fmt = function
   | JA t -> fprintf fmt "JA(%a)" pp_ja_type t
   | JEQ -> fprintf fmt "JEQ"
@@ -135,24 +130,40 @@ and pp_typ fmt = function
   | INT size -> fprintf fmt "int_%d" size
   | STRUCT (_s, _l, members) ->
       fprintf fmt "struct([%a])" (pp_lst_cma pp_struct_member) members
-  | DATASEC (name, entry) ->
-      fprintf fmt "datasec(%s,%a)" name pp_datasec_entry entry
   | OTHER s -> fprintf fmt "other(%s)" s
   | ELF -> fprintf fmt "elf"
+
+and pp_load_typ fmt { region; offset; typ } =
+  fprintf fmt "load_typ(%s+%Ld, typ=%a)" region offset pp_typ typ
+
+let pp_data_kind fmt = function
+  | INIT_DATA -> fprintf fmt "init"
+  | ZERO_BSS -> fprintf fmt "zero"
+  | RODATA -> fprintf fmt "rodata"
+
+let rec pp_data_region fmt (region : data_region) =
+  fprintf fmt "%-16s size=%-4d %a" region.section_name region.size pp_data_kind
+    region.kind
+and pp_data_regions fmt (ctx : context) =
+  let data_regions = Hashtbl.to_seq_values ctx.data_regions |> List.of_seq in
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "@.") pp_data_region fmt
+    data_regions
 
 let rec pp_info fmt = function
   | BPF_FUNC s -> fprintf fmt "call_bpf(%s)" s
   | CALL_DEST (target, value) ->
       fprintf fmt "call_dest(%s,%Ld)" target value
-  | LOAD_DEST (target, value) ->
-      fprintf fmt "load_dest(%s,%Ld)" target value
+  | LOAD_TYP load_typ -> fprintf fmt "%a" pp_load_typ load_typ
   | GOTO_DEST line -> fprintf fmt "goto_dest(%d)" line
-  | TYP typ -> fprintf fmt "typ(%a)" pp_typ typ
-and pp_infos fmt infos = pp_lst_cma pp_info fmt infos
 
-let rec pp_lineInfo fmt (line, infos) =
-  fprintf fmt "%a ~ %a" pp_line line pp_infos infos
-and pp_lineInfos fmt li = pp_lst_brk pp_lineInfo fmt li
+and pp_info_opt fmt = function
+  | None -> ()
+  | Some info -> pp_info fmt info
+
+let rec pp_line_info fmt (line, infos) =
+  fprintf fmt "%a ~ %a" pp_line line pp_info_opt infos
+and pp_line_infos fmt li = pp_lst_brk pp_line_info fmt li
 
 let pp_fonction fmt (fonction : fonction) =
-  fprintf fmt "%s [bind=%s, entry=%b]@.%a" fonction.name fonction.bind fonction.is_entry pp_lineInfos fonction.code
+  fprintf fmt "%s [bind=%s, entry=%b]@.%a" fonction.name fonction.bind
+    fonction.is_entry pp_line_infos fonction.code

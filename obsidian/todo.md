@@ -1,43 +1,24 @@
 # Next
-
-
-
-
-
-```
-Étape 1 — charger les bytes des sections DATA
-type data_region = {
-  section_name : string;
-  bytes : bytes;
-  size : int;
-}
-Dans context : data_regions : (string, data_region) Hashtbl.t
-Suivre les DATA de sections.tsv
-
-Affichage des différentes régions (que les infos).
-
-2. Créer LOAD_TYP
-LOAD_DEST  = où ça pointe physiquement
-TYP        = ce que c’est symboliquement / BTF
-On veut FUSIONNER le load et le type ! Avec une info liée au région
-type load_typ = {  
-region : string; (* ".data", ".rodata", ".maps", ... *)  
-offset : int64; (* offset physique dans la région *)  
-typ : typ; (* info BTF symbolique *)  
-}
-type info =  
-| BPF_FUNC of string  
-| CALL_DEST of string * int64  
-| GOTO_DEST of int  
-| LOAD_TYP of load_typ
-```
-
-
-. bss et .rodata-str.N
 - Faire une passe finale pour les rejets
 - Lire le git d'Erwan pour apprendre eBPF!
 
 # Questions
+- .rodata.str1.1 est dans section et région mais pas dans btf
+- Parser la datasec .maps différemment pour avoir assez d'infos sur les maps
+
+```
+Size 2
+48 : r1 = load_typ(.maps+0, typ=struct([type:ptr(array_1(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(**array_2**(int_4))]))
+
+Size 1
+48 : r1 = load_typ(.maps+0, typ=struct([type:ptr(array_1(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(**array_1**(int_4))]))
+-
+48 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_typ(.maps+0, typ=struct([type:ptr(**array_23**(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_2(int_4))]))
+
+BPF_MAP_TYPE_HASH
+48 : instr64(LD(DW,IMM), INTEGER, dst=1, src=0, offset=0, imm=0ll) ~ load_typ(.maps+0, typ=struct([type:ptr(**array_1**(int_4)), key:ptr(int_4), value:ptr(int_4), max_entries:ptr(array_2(int_4))]))
+```
+- Il faut calculer d'autres choses?
 
 # Later
 - Lire thèse qui explique MOPSA
