@@ -4,9 +4,9 @@
 SEC("xdp")
 int xdp_demo(void *ctx)
 {
-  int x = 1;
-  int y = 2;
-  return x + y;
+  unsigned int x = 1;
+  unsigned int y = 0;
+  return x / y;
 }
 
 int main(int argc, char **argv)
